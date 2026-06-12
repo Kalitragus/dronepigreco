@@ -286,6 +286,72 @@ function initCascade() {
 }
 
 // ---------------------------------------------------------------------------
+// Common quantization: the drone is the tonal master of the studio.
+// - Prime Quantization ON  -> Granulone quantization forced (Slice Mix 100%,
+//   root note = drone note, controls temporarily disabled).
+// - Prime Quantization OFF -> Granulone root note follows the drone note
+//   automatically; Slice Mix stays in the user's hands.
+// ---------------------------------------------------------------------------
+const NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+let quantPrimeForced = null;
+let quantSavedSliceMix = null;
+let quantLastRootNote = null;
+
+function droneNoteName(freq) {
+  if (!Number.isFinite(freq) || freq <= 0) return null;
+  const midi = Math.round(12 * Math.log2(freq / 440)) + 69;
+  return NOTE_NAMES[((midi % 12) + 12) % 12];
+}
+
+function setControlValue(el, value, eventName) {
+  el.value = value;
+  el.dispatchEvent(new Event(eventName, { bubbles: true }));
+}
+
+function syncQuantization() {
+  if (!window.DroneAPI) return;
+  const state = window.DroneAPI.getState();
+  const rootSelect = document.getElementById("rootNote");
+  const mixSlider = document.getElementById("sliceMix");
+  if (!rootSelect || !mixSlider) return;
+
+  if (state.primeMode) {
+    if (quantPrimeForced !== true) {
+      quantPrimeForced = true;
+      quantSavedSliceMix = mixSlider.value;
+      setControlValue(mixSlider, 100, "input");
+      mixSlider.disabled = true;
+      rootSelect.disabled = true;
+      const hint = "Controllato dalla Prime Quantization del drone";
+      mixSlider.title = hint;
+      rootSelect.title = hint;
+      status("Quantizzazione comune: primi (drone) → Granulone");
+    }
+  } else if (quantPrimeForced !== false) {
+    quantPrimeForced = false;
+    mixSlider.disabled = false;
+    rootSelect.disabled = false;
+    mixSlider.title = "";
+    rootSelect.title = "";
+    if (quantSavedSliceMix != null) {
+      setControlValue(mixSlider, quantSavedSliceMix, "input");
+      quantSavedSliceMix = null;
+    }
+  }
+
+  const note = droneNoteName(state.baseFrequency);
+  if (note && note !== quantLastRootNote) {
+    quantLastRootNote = note;
+    setControlValue(rootSelect, note, "change");
+  }
+}
+
+function initQuantizationSync() {
+  syncQuantization();
+  setInterval(syncQuantization, 400);
+}
+
+// ---------------------------------------------------------------------------
 // Combined studio presets: full drone state + granulone global controls.
 // (Slices depend on the loaded sample file, so they are not persisted.)
 // ---------------------------------------------------------------------------
@@ -403,6 +469,7 @@ function initStudioPresets() {
     initTabs();
     initStudioPresets();
     initCascade();
+    initQuantizationSync();
     loading?.remove();
     document.getElementById("drone-panel").hidden = false;
   } catch (error) {
