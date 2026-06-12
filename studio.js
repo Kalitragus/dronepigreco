@@ -224,6 +224,7 @@ function initTransport() {
     const bpm = Number.isFinite(raw) ? Math.min(220, Math.max(40, raw)) : 110;
     clock.bpm = bpm;
     bpmInput.value = bpm;
+    refreshAllDelaySync();
   });
 }
 
@@ -366,6 +367,103 @@ function initCascade() {
       startCascadeRecording();
     }
   });
+}
+
+// ---------------------------------------------------------------------------
+// Delay Sync per le slice di Granulone (stile Ableton): il tempo del delay
+// può agganciarsi alle divisioni musicali del BPM della sezione ritmica.
+// Usa il VALORE del BPM, non il clock che corre: funziona anche a transport
+// fermo. Tutto iniettato dallo shell: granulone non sa nulla del tempo.
+// ---------------------------------------------------------------------------
+const DELAY_DIVISIONS = [
+  ["1/32", 0.125],
+  ["1/16", 0.25],
+  ["1/16.", 0.375],
+  ["1/8", 0.5],
+  ["1/8.", 0.75],
+  ["1/4", 1],
+  ["1/4.", 1.5],
+  ["1/2", 2],
+  ["1 bar", 4]
+];
+const delaySyncState = new Map();
+
+function syncedDelayMs(beats) {
+  return Math.round((60 / clock.bpm) * beats * 1000);
+}
+
+function applyDelaySync(card) {
+  const state = delaySyncState.get(card.dataset.sliceId);
+  const input = card.querySelector(".slice-delay-time");
+  if (!state || !input) return;
+  if (state.enabled) {
+    const max = parseFloat(input.max) || 2500;
+    input.value = Math.min(max, syncedDelayMs(state.beats));
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    input.disabled = true;
+  } else {
+    input.disabled = false;
+  }
+}
+
+function injectDelaySync(card) {
+  const sliceId = card.dataset.sliceId;
+  if (!sliceId || card.querySelector(".delay-sync")) return;
+  const delayInput = card.querySelector(".slice-delay-time");
+  const control = delayInput?.closest("label.control");
+  if (!control) return;
+  let state = delaySyncState.get(sliceId);
+  if (!state) {
+    state = { enabled: false, beats: 0.5 };
+    delaySyncState.set(sliceId, state);
+  }
+  const row = document.createElement("span");
+  row.className = "delay-sync";
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "delay-sync-btn" + (state.enabled ? " on" : "");
+  btn.textContent = "SYNC";
+  btn.title = "Aggancia il delay alle divisioni del BPM";
+  const select = document.createElement("select");
+  select.className = "delay-sync-div";
+  DELAY_DIVISIONS.forEach(([label, beats]) => {
+    const option = document.createElement("option");
+    option.value = beats;
+    option.textContent = label;
+    select.appendChild(option);
+  });
+  select.value = String(state.beats);
+  select.hidden = !state.enabled;
+  btn.addEventListener("click", () => {
+    state.enabled = !state.enabled;
+    btn.classList.toggle("on", state.enabled);
+    select.hidden = !state.enabled;
+    applyDelaySync(card);
+  });
+  select.addEventListener("change", () => {
+    state.beats = parseFloat(select.value) || 0.5;
+    applyDelaySync(card);
+  });
+  row.append(btn, select);
+  control.appendChild(row);
+  applyDelaySync(card);
+}
+
+function refreshAllDelaySync() {
+  document.querySelectorAll("#granulone-panel .slice-card[data-slice-id]").forEach(card => {
+    const state = delaySyncState.get(card.dataset.sliceId);
+    if (state?.enabled) applyDelaySync(card);
+  });
+}
+
+function initDelaySync() {
+  const container = document.querySelector("#granulone-panel #slices");
+  if (!container) return;
+  const scan = () => {
+    container.querySelectorAll(".slice-card[data-slice-id]").forEach(injectDelaySync);
+  };
+  new MutationObserver(scan).observe(container, { childList: true, subtree: true });
+  scan();
 }
 
 // ---------------------------------------------------------------------------
@@ -652,6 +750,7 @@ function importStudioPreset(file) {
       clock.bpm = Math.min(220, Math.max(40, parsed.bpm));
       const bpmInput = document.getElementById("bpmInput");
       if (bpmInput) bpmInput.value = clock.bpm;
+      refreshAllDelaySync();
     }
     // Also accept plain drone presets exported from the standalone page.
     if (!applied && window.DroneAPI?.applyState(parsed?.state || parsed)) applied = true;
@@ -702,6 +801,7 @@ function initStudioPresets() {
     initStudioPresets();
     initCascade();
     initQuantizationSync();
+    initDelaySync();
     initTour();
     loading?.remove();
     document.getElementById("drone-panel").hidden = false;

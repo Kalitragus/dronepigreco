@@ -358,6 +358,44 @@
       box-shadow: 0 0 16px rgba(196, 76, 58, 0.7), inset 0 1px 4px rgba(0, 0, 0, 0.6);
     }
 
+    .delay-sync {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      margin-top: 4px;
+    }
+
+    .delay-sync-btn {
+      font-size: 9px;
+      letter-spacing: 0.1em;
+      padding: 2px 9px;
+      border-radius: 999px;
+      border: 1px solid rgba(90, 209, 255, 0.35);
+      background: transparent;
+      color: rgba(236, 243, 255, 0.5);
+      cursor: pointer;
+    }
+
+    .delay-sync-btn.on {
+      color: var(--accent);
+      background: var(--accent-soft);
+      border-color: rgba(90, 209, 255, 0.55);
+      box-shadow: 0 0 6px rgba(90, 209, 255, 0.3);
+    }
+
+    .delay-sync-div {
+      font-size: 10px;
+      background: rgba(236, 243, 255, 0.08);
+      color: #ecf3ff;
+      border: 1px solid rgba(236, 243, 255, 0.2);
+      border-radius: 6px;
+      padding: 2px 4px;
+    }
+
+    #granulone-panel input.slice-delay-time:disabled {
+      opacity: 0.4;
+    }
+
     .studio-panel {
       display: flex;
       flex-direction: column;
