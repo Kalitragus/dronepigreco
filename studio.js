@@ -3,6 +3,8 @@
 // (python3 -m http.server) because it fetches the two synth pages at runtime.
 import GranularEngine from "./granulone/src/granularEngine.js";
 import { setupUI } from "./granulone/src/ui.js";
+import { createBassline } from "./bassline.js";
+import { createMosquitoDrums } from "./mosquito_drums.js";
 
 // ---------------------------------------------------------------------------
 // Shared audio: ONE context, one master bus, one safety limiter.
@@ -49,8 +51,64 @@ function registerCascadeSend(name, sourceNode, initialGain = 0.8) {
   return send;
 }
 
+// ---------------------------------------------------------------------------
+// Shared clock: 16th-note grid with lookahead scheduling on a fixed timer
+// (the same anti-glitch pattern used everywhere else). Subscribers get
+// callback(audioTime, stepIndex 0-15) for every step.
+// ---------------------------------------------------------------------------
+const clock = {
+  bpm: 110,
+  running: false,
+  step: 0,
+  nextStepTime: 0,
+  listeners: new Set(),
+  _timer: null
+};
+
+function clockStepDuration() {
+  return 60 / clock.bpm / 4;
+}
+
+function clockTick() {
+  const lookAhead = 0.35;
+  while (clock.nextStepTime < ctx.currentTime + lookAhead) {
+    const time = clock.nextStepTime;
+    const step = clock.step;
+    clock.listeners.forEach(fn => {
+      try {
+        fn(time, step);
+      } catch (error) {
+        console.error(error);
+      }
+    });
+    clock.nextStepTime += clockStepDuration();
+    clock.step = (clock.step + 1) % 16;
+  }
+}
+
+clock.start = () => {
+  if (clock.running) return;
+  clock.running = true;
+  clock.step = 0;
+  clock.nextStepTime = ctx.currentTime + 0.1;
+  clock._timer = setInterval(clockTick, 40);
+};
+
+clock.stop = () => {
+  clock.running = false;
+  if (clock._timer) {
+    clearInterval(clock._timer);
+    clock._timer = null;
+  }
+};
+
+clock.subscribe = fn => {
+  clock.listeners.add(fn);
+  return () => clock.listeners.delete(fn);
+};
+
 window.ctx = ctx;
-window.SharedAudio = { ctx, masterBus, limiter, cascadeBus, registerCascadeSend };
+window.SharedAudio = { ctx, masterBus, limiter, cascadeBus, registerCascadeSend, clock };
 
 const unlockAudio = () => {
   if (ctx.state === "suspended") {
@@ -144,6 +202,32 @@ function initTabs() {
 }
 
 // ---------------------------------------------------------------------------
+// Transport (clock condiviso di basso e batteria)
+// ---------------------------------------------------------------------------
+function initTransport() {
+  const playBtn = document.getElementById("clockPlayBtn");
+  const bpmInput = document.getElementById("bpmInput");
+  playBtn?.addEventListener("click", () => {
+    unlockAudio();
+    if (clock.running) {
+      clock.stop();
+      playBtn.innerHTML = "&#9654;";
+      playBtn.classList.remove("running");
+    } else {
+      clock.start();
+      playBtn.innerHTML = "&#9632;";
+      playBtn.classList.add("running");
+    }
+  });
+  bpmInput?.addEventListener("change", () => {
+    const raw = parseFloat(bpmInput.value);
+    const bpm = Number.isFinite(raw) ? Math.min(220, Math.max(40, raw)) : 110;
+    clock.bpm = bpm;
+    bpmInput.value = bpm;
+  });
+}
+
+// ---------------------------------------------------------------------------
 // Cascata: record the drone send and pour the take into Granulone by
 // injecting it into its own file input — the whole Granulone pipeline
 // (decode, waveform, auto-slice) runs as if the user had picked a file.
@@ -190,16 +274,16 @@ function startCascadeRecording() {
   window.DroneAPI.ensureAudio();
   unlockAudio();
   const droneOut = window.DroneAPI.getOutput?.();
-  if (!droneOut) {
-    status("Uscita del drone non disponibile", true);
+  if (droneOut) {
+    registerCascadeSend("drone", droneOut, getCascadeAmount());
+  }
+  if (!window.DroneAPI.isRunning() && !clock.running) {
+    status("Avvia il drone o la sezione ritmica (▶) prima di riversare", true);
     return;
   }
-  if (!window.DroneAPI.isRunning()) {
-    status("Avvia prima il drone: la cascata registra ciò che suona", true);
-    return;
-  }
-  const send = registerCascadeSend("drone", droneOut, getCascadeAmount());
-  send.gain.setTargetAtTime(getCascadeAmount(), ctx.currentTime, 0.05);
+  cascadeSends.forEach(send => {
+    send.gain.setTargetAtTime(getCascadeAmount(), ctx.currentTime, 0.05);
+  });
 
   const mimeType = pickRecordingMimeType();
   try {
@@ -271,10 +355,9 @@ function initCascade() {
   const out = document.getElementById("cascadeVal");
   slider?.addEventListener("input", () => {
     if (out) out.textContent = `${slider.value}%`;
-    const send = cascadeSends.get("drone");
-    if (send) {
+    cascadeSends.forEach(send => {
       send.gain.setTargetAtTime(getCascadeAmount(), ctx.currentTime, 0.05);
-    }
+    });
   });
   document.getElementById("cascadeRecBtn")?.addEventListener("click", () => {
     if (cascadeRecorder && cascadeRecorder.state === "recording") {
@@ -530,9 +613,12 @@ function exportStudioPreset() {
   }
   const payload = {
     app: "drone-granulone-studio",
-    version: 1,
+    version: 2,
+    bpm: clock.bpm,
     drone: window.DroneAPI.getState(),
-    granulone: getGranuloneState()
+    granulone: getGranuloneState(),
+    bass: window.BassAPI?.getState?.() ?? null,
+    drums: window.DrumsAPI?.getState?.() ?? null
   };
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
@@ -560,6 +646,13 @@ function importStudioPreset(file) {
     let applied = false;
     if (parsed?.drone && window.DroneAPI?.applyState(parsed.drone)) applied = true;
     if (parsed?.granulone && applyGranuloneState(parsed.granulone)) applied = true;
+    if (parsed?.bass && window.BassAPI?.applyState(parsed.bass)) applied = true;
+    if (parsed?.drums && window.DrumsAPI?.applyState(parsed.drums)) applied = true;
+    if (Number.isFinite(parsed?.bpm)) {
+      clock.bpm = Math.min(220, Math.max(40, parsed.bpm));
+      const bpmInput = document.getElementById("bpmInput");
+      if (bpmInput) bpmInput.value = clock.bpm;
+    }
     // Also accept plain drone presets exported from the standalone page.
     if (!applied && window.DroneAPI?.applyState(parsed?.state || parsed)) applied = true;
     status(applied ? "Preset studio importato" : "Preset non riconosciuto", !applied);
@@ -589,7 +682,23 @@ function initStudioPresets() {
       getState: getGranuloneState,
       applyState: applyGranuloneState
     };
+
+    const bass = createBassline(ctx, {
+      masterBus,
+      clock,
+      getTonalState: () => window.DroneAPI?.getState?.() ?? null
+    });
+    bass.mount(document.getElementById("bass-panel"));
+    registerCascadeSend("bassline", bass.output, getCascadeAmount());
+    window.BassAPI = bass;
+
+    const drums = createMosquitoDrums(ctx, { masterBus, clock });
+    drums.mount(document.getElementById("drums-panel"));
+    registerCascadeSend("drums", drums.output, getCascadeAmount());
+    window.DrumsAPI = drums;
+
     initTabs();
+    initTransport();
     initStudioPresets();
     initCascade();
     initQuantizationSync();

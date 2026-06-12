@@ -197,6 +197,167 @@
       box-shadow: 0 0 18px rgba(90, 209, 255, 0.35);
     }
 
+    #transport {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.3rem 0.8rem;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+    }
+
+    #transport input {
+      width: 3.4em;
+      background: rgba(236, 243, 255, 0.08);
+      border: 1px solid var(--border);
+      color: #ecf3ff;
+      border-radius: 6px;
+      padding: 0.2rem 0.3rem;
+      font-size: 0.8rem;
+      text-align: center;
+    }
+
+    #transport .t-label {
+      font-size: 0.7rem;
+      color: rgba(236, 243, 255, 0.55);
+      letter-spacing: 0.08em;
+    }
+
+    #clockPlayBtn.running {
+      color: #7dd956;
+      border-color: rgba(125, 217, 86, 0.5);
+      background: rgba(125, 217, 86, 0.1);
+    }
+
+    .synth-section {
+      width: min(1100px, 100%);
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 1.8rem;
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.45);
+    }
+
+    .synth-section h2 {
+      margin: 0 0 0.5rem;
+      font-size: 1.05rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(236, 243, 255, 0.8);
+    }
+
+    .synth-hint {
+      margin: 0 0 1.2rem;
+      font-size: 0.82rem;
+      color: rgba(236, 243, 255, 0.55);
+      line-height: 1.55;
+      max-width: 720px;
+    }
+
+    .param-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem 1.4rem;
+    }
+
+    .param {
+      display: grid;
+      gap: 0.45rem;
+    }
+
+    .param label {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.5rem;
+      font-size: 0.72rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: rgba(236, 243, 255, 0.65);
+    }
+
+    .param input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent);
+    }
+
+    .drum-voices {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.2rem;
+    }
+
+    .drum-voice {
+      background: rgba(236, 243, 255, 0.04);
+      border: 1px solid rgba(236, 243, 255, 0.08);
+      border-radius: 14px;
+      padding: 1rem;
+      display: grid;
+      gap: 0.8rem;
+    }
+
+    .drum-voice header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.8rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: rgba(236, 243, 255, 0.7);
+    }
+
+    .dv-mute {
+      border: 1px solid rgba(236, 243, 255, 0.25);
+      background: transparent;
+      color: rgba(236, 243, 255, 0.55);
+      border-radius: 6px;
+      padding: 0.15rem 0.55rem;
+      font-size: 0.72rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .dv-mute.active {
+      background: #ff5555;
+      border-color: #ff5555;
+      color: #11141a;
+      box-shadow: 0 0 8px rgba(255, 85, 85, 0.5);
+    }
+
+    #swarmCanvas {
+      display: block;
+      width: 100%;
+      height: 190px;
+      background: #0a1408;
+      border-radius: 12px;
+      border: 1px solid rgba(125, 217, 86, 0.18);
+      cursor: crosshair;
+      margin-bottom: 1rem;
+    }
+
+    .swarm-controls {
+      display: flex;
+      gap: 1.6rem;
+      align-items: flex-end;
+      flex-wrap: wrap;
+    }
+
+    .panic-btn {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 30%, #6a3024 0%, #3a1810 100%);
+      border: 1px solid #2a1008;
+      cursor: pointer;
+      color: transparent;
+      overflow: hidden;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 100, 80, 0.2);
+      transition: box-shadow 0.1s ease;
+    }
+
+    .panic-btn:active {
+      box-shadow: 0 0 16px rgba(196, 76, 58, 0.7), inset 0 1px 4px rgba(0, 0, 0, 0.6);
+    }
+
     .studio-panel {
       display: flex;
       flex-direction: column;
@@ -232,6 +393,13 @@
     <span class="brand">Studio</span>
     <button class="tab-btn active" data-tab="drone-panel" type="button">Drone π</button>
     <button class="tab-btn" data-tab="granulone-panel" type="button">Granulone</button>
+    <button class="tab-btn" data-tab="bass-panel" type="button">Basso</button>
+    <button class="tab-btn" data-tab="drums-panel" type="button">Drums</button>
+    <div id="transport" title="Clock condiviso di basso e batteria">
+      <button id="clockPlayBtn" class="studio-action" type="button">&#9654;</button>
+      <input type="number" id="bpmInput" min="40" max="220" value="110">
+      <span class="t-label">BPM</span>
+    </div>
     <span class="spacer"></span>
     <div id="cascade-controls" title="Registra il drone e riversalo come campione nel Granulone">
       <label for="cascadeAmount">Cascata</label>
@@ -249,6 +417,8 @@
   <div id="studio-loading">Caricamento synth…</div>
   <div id="drone-panel" class="studio-panel" hidden></div>
   <div id="granulone-panel" class="studio-panel" hidden></div>
+  <div id="bass-panel" class="studio-panel" hidden></div>
+  <div id="drums-panel" class="studio-panel" hidden></div>
 
   <script>
     // Opened by double-clicking the file: modules and fetch are blocked on
