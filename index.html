@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Drone Machine π</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: "Inter", "Segoe UI", sans-serif;
+      background: #0a0c12;
+      color: #ecf3ff;
+      --accent: #5ad1ff;
+      --accent-soft: rgba(90, 209, 255, 0.18);
+      --panel: rgba(22, 26, 35, 0.88);
+      --border: rgba(255, 255, 255, 0.1);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 3rem 1.5rem 2.5rem;
+      gap: 2rem;
+    }
+
+    main {
+      width: min(1100px, 100%);
+      display: flex;
+      flex-direction: column;
+      gap: 2.5rem;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: clamp(1.6rem, 2vw, 2.3rem);
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.45);
+    }
+
+    h1 {
+      margin: 0 0 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: clamp(1.6rem, 3vw, 2.3rem);
+      font-weight: 600;
+    }
+
+    p.lead {
+      margin: 0;
+      color: rgba(236, 243, 255, 0.72);
+      line-height: 1.6;
+      max-width: 720px;
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-top: 1.6rem;
+    }
+
+    button {
+      border: 1px solid rgba(90, 209, 255, 0.4);
+      background: var(--accent-soft);
+      color: var(--accent);
+      border-radius: 999px;
+      padding: 0.8rem 1.6rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+
+    button:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 18px 28px rgba(90, 209, 255, 0.25);
+    }
+
+    button:disabled {
+      opacity: 0.55;
+      cursor: default;
+    }
+
+    h2 {
+      margin: 0 0 1.2rem;
+      font-size: 1.15rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(236, 243, 255, 0.78);
+    }
+
+    .global-controls {
+      display: grid;
+      gap: 1.4rem;
+    }
+
+    .slider {
+      display: grid;
+      gap: 0.6rem;
+    }
+
+    .slider label {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 0.6rem;
+      font-size: 0.85rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: rgba(236, 243, 255, 0.72);
+    }
+
+    .slider label .note-display {
+      display: flex;
+      align-items: baseline;
+      gap: 0.45rem;
+      font-size: 0.82rem;
+      letter-spacing: 0.03em;
+      color: rgba(236, 243, 255, 0.78);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .slider label .note-display output {
+      color: rgba(236, 243, 255, 0.82);
+    }
+
+    .slider label .note-display .note-pill {
+      padding: 0.1rem 0.55rem;
+      border-radius: 999px;
+      border: 1px solid rgba(236, 243, 255, 0.18);
+      background: rgba(236, 243, 255, 0.08);
+      font-size: 0.75rem;
+    }
+
+    input[type="range"] {
+      appearance: none;
+      width: 100%;
+      height: 6px;
+      background: rgba(236, 243, 255, 0.18);
+      border-radius: 999px;
+      outline: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 0 4px rgba(90, 209, 255, 0.2);
+      cursor: pointer;
+    }
+
+    .voices-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.4rem;
+    }
+
+    .voice-card {
+      background: rgba(236, 243, 255, 0.04);
+      border: 1px solid rgba(236, 243, 255, 0.08);
+      border-radius: 14px;
+      padding: 1.1rem;
+      display: grid;
+      gap: 1rem;
+    }
+
+    .voice-card header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(236, 243, 255, 0.68);
+    }
+
+    .voice-card header .voice-freq {
+      margin-left: auto;
+    }
+
+    .mute-btn {
+      border: 1px solid rgba(236, 243, 255, 0.25);
+      background: transparent;
+      color: rgba(236, 243, 255, 0.55);
+      border-radius: 6px;
+      padding: 0.15rem 0.55rem;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+
+    .mute-btn.active {
+      background: #ff5555;
+      border-color: #ff5555;
+      color: #11141a;
+      box-shadow: 0 0 8px rgba(255, 85, 85, 0.5);
+    }
+
+    .kb-toggle {
+      display: inline-flex;
+      align-items: center;
+      vertical-align: middle;
+      margin-right: 0.55rem;
+      padding: 0.32rem 0.55rem;
+      border-radius: 6px;
+      border: 1px solid rgba(236, 243, 255, 0.25);
+      background: transparent;
+      color: rgba(236, 243, 255, 0.45);
+    }
+
+    .kb-toggle.active {
+      color: var(--accent);
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      box-shadow: 0 0 8px rgba(90, 209, 255, 0.45);
+    }
+
+    .voice-card select {
+      background: rgba(236, 243, 255, 0.12);
+      border: 1px solid rgba(236, 243, 255, 0.22);
+      border-radius: 999px;
+      padding: 0.45rem 0.9rem;
+      color: #ecf3ff;
+      font-size: 0.85rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    #page-footer {
+      width: min(1100px, 100%);
+      padding: 1.5rem clamp(1rem, 2vw, 1.6rem);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: rgba(22, 26, 35, 0.7);
+    }
+
+    .prime-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.85rem 1rem;
+      border-radius: 12px;
+      border: 1px solid rgba(236, 243, 255, 0.12);
+      background: rgba(236, 243, 255, 0.06);
+      text-transform: uppercase;
+      font-size: 0.85rem;
+      letter-spacing: 0.05em;
+      color: rgba(236, 243, 255, 0.78);
+      gap: 1rem;
+    }
+
+    .prime-toggle input {
+      accent-color: var(--accent);
+      width: 1.4rem;
+      height: 1.4rem;
+    }
+
+    #math-mode-controls {
+      display: grid;
+      gap: 0.75rem;
+    }
+
+    #math-mode-controls label {
+      font-size: 0.8rem;
+      letter-spacing: 0.18em;
+      color: rgba(236, 243, 255, 0.62);
+      text-transform: uppercase;
+    }
+
+    .mode-buttons {
+      display: flex;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+
+    .mode-btn {
+      position: relative;
+      margin: 4px;
+      padding: 0.45rem 0.95rem;
+      border: 1px solid #2c3442;
+      background: #1b1f27;
+      color: #d8e2ff;
+      border-radius: 8px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      min-width: 70px;
+      justify-content: center;
+      letter-spacing: 0.12em;
+      font-size: 0.82rem;
+      transition: background 0.25s ease, transform 0.15s ease;
+    }
+
+    .mode-btn:hover {
+      background: #252b35;
+      transform: translateY(-1px);
+    }
+
+    .mode-btn .indicator {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #222;
+      box-shadow: none;
+      transition: background 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .mode-btn.active {
+      background: #2a3847;
+    }
+
+    .mode-btn.active .indicator {
+      background: #00b3ff;
+      box-shadow: 0 0 6px #00b3ff88;
+    }
+
+    .mode-btn.random {
+      background: #2a3440;
+      font-size: 0.78rem;
+      padding: 0.45rem 1.2rem;
+    }
+
+    .mode-btn.random.active {
+      background: #00b3ff22;
+    }
+
+    .preset-controls {
+      display: grid;
+      gap: 0.9rem;
+    }
+
+    .preset-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      align-items: center;
+    }
+
+    .preset-controls input[type="text"],
+    .preset-controls select {
+      flex: 1;
+      min-width: 160px;
+      background: rgba(236, 243, 255, 0.1);
+      border: 1px solid rgba(236, 243, 255, 0.22);
+      border-radius: 999px;
+      padding: 0.65rem 1.1rem;
+      color: #ecf3ff;
+      font-size: 0.9rem;
+      letter-spacing: 0.03em;
+    }
+
+    label.file-button {
+      border: 1px solid rgba(90, 209, 255, 0.4);
+      background: var(--accent-soft);
+      color: var(--accent);
+      border-radius: 999px;
+      padding: 0.8rem 1.6rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.2s ease;
+    }
+
+    label.file-button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 18px 28px rgba(90, 209, 255, 0.25);
+    }
+
+    .keyboard-hint {
+      margin: 0.4rem 0 0;
+      font-size: 0.72rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: rgba(236, 243, 255, 0.48);
+    }
+
+    #perf-footer {
+      position: fixed;
+      bottom: 4px;
+      right: 8px;
+      font-family: monospace;
+      font-size: 0.75em;
+      color: #8892a6;
+      background: rgba(20, 24, 30, 0.7);
+      padding: 2px 6px;
+      border-radius: 4px;
+      z-index: 10;
+      user-select: none;
+      pointer-events: none;
+    }
+
+    #perf-stats.alert {
+      color: #ff5555;
+    }
+
+    @media (max-width: 720px) {
+      body {
+        padding: 2.2rem 1rem;
+      }
+
+      .panel {
+        padding: 1.4rem;
+      }
+
+      .button-row {
+        justify-content: center;
+      }
+    }
+  </style>
+  <script src="pigreco.js" defer></script>
+  <script src="pi_fx.js" defer></script>
+  <script src="pi_reverb.js" defer></script>
+  <script src="drone.js" defer></script>
+  <script src="smart.js" defer></script>
+  <script src="footer.js" defer></script>
+</head>
+<body>
+  <main>
+    <section class="panel">
+      <h1>Drone Machine π</h1>
+      <p class="lead">
+        A four-voice Web Audio synthesizer sculpted by π relationships. Launch the drone, sculpt spectra, and morph between evolving resonances.
+      </p>
+      <div class="button-row">
+        <button id="startBtn">Start Drone</button>
+        <button id="stopBtn" disabled>Stop Drone</button>
+        <button id="randomBtn">Randomize</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Global Controls</h2>
+      <div class="global-controls">
+        <div class="slider">
+          <label for="baseFreq">
+            Base Frequency
+            <span class="note-display">
+              <output id="baseFreqVal">220.00 Hz</output>
+              <span id="current-note" class="note-pill">A3</span>
+            </span>
+          </label>
+          <input type="range" id="baseFreq" min="20" max="440" step="0.5" value="220">
+        </div>
+        <div class="slider">
+          <label for="piDepth">
+            π Depth
+            <output id="piDepthVal">0.40</output>
+          </label>
+          <input type="range" id="piDepth" min="0" max="1" step="0.01" value="0.4">
+        </div>
+        <div class="slider">
+          <label for="morph">
+            Morph
+            <output id="morphVal">0.00</output>
+          </label>
+          <input type="range" id="morph" min="0" max="1" step="0.01" value="0">
+        </div>
+        <div class="slider">
+          <label for="resonatorAmount">
+            Resonator Amount
+            <output id="resonatorVal">0.35</output>
+          </label>
+          <input type="range" id="resonatorAmount" min="0" max="1" step="0.01" value="0.35">
+        </div>
+        <div class="slider">
+          <label for="fxAmount">
+            FX Amount
+            <output id="fxAmountVal">0.50</output>
+          </label>
+          <input type="range" id="fxAmount" min="0" max="1" step="0.01" value="0.5">
+        </div>
+        <div class="slider">
+          <label for="masterVolume">
+            Master Volume
+            <output id="masterVolumeVal">0.80</output>
+          </label>
+          <input type="range" id="masterVolume" min="0" max="1" step="0.01" value="0.8">
+        </div>
+        <label class="prime-toggle" for="primeMode">
+          <span>Prime Quantization</span>
+          <input type="checkbox" id="primeMode">
+        </label>
+        <div id="math-mode-controls">
+          <label>Mathematical Modes</label>
+          <div class="mode-buttons">
+            <button id="pi-mode" class="mode-btn active" type="button">
+              <span>π</span>
+              <span class="indicator"></span>
+            </button>
+            <button id="e-mode" class="mode-btn" type="button">
+              <span>e</span>
+              <span class="indicator"></span>
+            </button>
+            <button id="phi-mode" class="mode-btn" type="button">
+              <span>φ</span>
+              <span class="indicator"></span>
+            </button>
+            <button id="zeta-mode" class="mode-btn" type="button">
+              <span>ζ(3)</span>
+              <span class="indicator"></span>
+            </button>
+            <button id="sqrt2-mode" class="mode-btn" type="button">
+              <span>√2</span>
+              <span class="indicator"></span>
+            </button>
+            <button id="phi2-mode" class="mode-btn" type="button">
+              <span>φ²</span>
+              <span class="indicator"></span>
+            </button>
+            <button id="gamma-mode" class="mode-btn" type="button">
+              <span>γ</span>
+              <span class="indicator"></span>
+            </button>
+            <button id="sqrt5-mode" class="mode-btn" type="button">
+              <span>√5</span>
+              <span class="indicator"></span>
+            </button>
+            <button id="catalan-mode" class="mode-btn" type="button">
+              <span>G</span>
+              <span class="indicator"></span>
+            </button>
+            <button id="sqrt3-mode" class="mode-btn" type="button">
+              <span>√3</span>
+              <span class="indicator"></span>
+            </button>
+            <button id="tau-mode" class="mode-btn" type="button">
+              <span>τ</span>
+              <span class="indicator"></span>
+            </button>
+            <button id="zeta2-mode" class="mode-btn" type="button">
+              <span>ζ(2)</span>
+              <span class="indicator"></span>
+            </button>
+            <button id="random-mode" class="mode-btn random" type="button">RANDOM</button>
+          </div>
+          <p class="keyboard-hint">
+            <button id="kbToggle" class="kb-toggle" type="button" aria-pressed="false" title="Computer keyboard on/off">
+              <svg width="20" height="13" viewBox="0 0 20 13" aria-hidden="true">
+                <rect x="0.5" y="0.5" width="19" height="12" rx="2" fill="none" stroke="currentColor"/>
+                <line x1="7" y1="0.5" x2="7" y2="12.5" stroke="currentColor"/>
+                <line x1="13" y1="0.5" x2="13" y2="12.5" stroke="currentColor"/>
+                <rect x="5.4" y="0.5" width="3.2" height="7" fill="currentColor"/>
+                <rect x="11.4" y="0.5" width="3.2" height="7" fill="currentColor"/>
+              </svg>
+            </button>
+            <span>Keyboard: A W S E D F T G Y H U J K &nbsp;|&nbsp; Z/X change octave</span>
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Evolve</h2>
+      <div class="global-controls">
+        <label class="prime-toggle" for="driftToggle">
+          <span>Slow Drift (Generative)</span>
+          <input type="checkbox" id="driftToggle">
+        </label>
+        <div class="slider">
+          <label for="driftRate">
+            Drift Rate
+            <output id="driftRateVal">0.30</output>
+          </label>
+          <input type="range" id="driftRate" min="0" max="1" step="0.01" value="0.3">
+        </div>
+        <div class="slider">
+          <label for="driftDepth">
+            Drift Intensity
+            <output id="driftDepthVal">0.35</output>
+          </label>
+          <input type="range" id="driftDepth" min="0" max="1" step="0.01" value="0.35">
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" id="preset-panel">
+      <h2>Presets</h2>
+      <div class="preset-controls">
+        <div class="preset-row">
+          <input type="text" id="presetName" placeholder="Preset name" maxlength="40" autocomplete="off">
+          <button id="presetSaveBtn" type="button">Save</button>
+        </div>
+        <div class="preset-row">
+          <select id="presetList"></select>
+          <button id="presetLoadBtn" type="button" disabled>Load</button>
+          <button id="presetDeleteBtn" type="button" disabled>Delete</button>
+        </div>
+        <div class="preset-row">
+          <button id="presetExportBtn" type="button">Export File</button>
+          <label class="file-button" for="presetImportInput">Import File</label>
+          <input type="file" id="presetImportInput" hidden>
+        </div>
+        <p id="presetStatus" class="keyboard-hint"></p>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Voices</h2>
+      <div class="voices-grid">
+        <article class="voice-card" data-voice="0">
+          <header>
+            <span>Voice 1</span>
+            <button id="voice-0-mute" class="mute-btn" type="button" aria-pressed="false" title="Mute voice 1">M</button>
+            <span id="voice-0-freq" class="voice-freq">220.0 Hz</span>
+          </header>
+          <label>
+            Waveform
+            <select id="voice-0-waveform" data-voice="0" data-param="waveform">
+              <option value="sine">Sine</option>
+              <option value="triangle">Triangle</option>
+              <option value="sawtooth">Sawtooth</option>
+              <option value="square">Square</option>
+            </select>
+          </label>
+          <div class="slider">
+            <label for="voice-0-pan">
+              Pan
+              <output id="voice-0-pan-val">-0.60</output>
+            </label>
+            <input type="range" id="voice-0-pan" min="-1" max="1" step="0.01" value="-0.6" data-voice="0" data-param="pan">
+          </div>
+          <div class="slider">
+            <label for="voice-0-gain">
+              Gain
+              <output id="voice-0-gain-val">0.22</output>
+            </label>
+            <input type="range" id="voice-0-gain" min="0" max="0.5" step="0.01" value="0.22" data-voice="0" data-param="gain">
+          </div>
+          <div class="slider">
+            <label>
+              LP Cutoff
+              <output id="voice-0-cutoff-val">4000 Hz</output>
+            </label>
+            <input type="range" id="voice-0-cutoff" min="200" max="10000" step="10" value="4000" data-voice="0" data-param="cutoff">
+          </div>
+          <div class="slider">
+            <label>
+              Resonance
+              <output id="voice-0-res-val">0.7</output>
+            </label>
+            <input type="range" id="voice-0-res" min="0.1" max="10" step="0.1" value="0.7" data-voice="0" data-param="resonance">
+          </div>
+        </article>
+
+        <article class="voice-card" data-voice="1">
+          <header>
+            <span>Voice 2</span>
+            <button id="voice-1-mute" class="mute-btn" type="button" aria-pressed="false" title="Mute voice 2">M</button>
+            <span id="voice-1-freq" class="voice-freq">345.6 Hz</span>
+          </header>
+          <label>
+            Waveform
+            <select id="voice-1-waveform" data-voice="1" data-param="waveform">
+              <option value="triangle">Triangle</option>
+              <option value="sine">Sine</option>
+              <option value="sawtooth">Sawtooth</option>
+              <option value="square">Square</option>
+            </select>
+          </label>
+          <div class="slider">
+            <label for="voice-1-pan">
+              Pan
+              <output id="voice-1-pan-val">-0.20</output>
+            </label>
+            <input type="range" id="voice-1-pan" min="-1" max="1" step="0.01" value="-0.2" data-voice="1" data-param="pan">
+          </div>
+          <div class="slider">
+            <label for="voice-1-gain">
+              Gain
+              <output id="voice-1-gain-val">0.18</output>
+            </label>
+            <input type="range" id="voice-1-gain" min="0" max="0.5" step="0.01" value="0.18" data-voice="1" data-param="gain">
+          </div>
+          <div class="slider">
+            <label>
+              LP Cutoff
+              <output id="voice-1-cutoff-val">4000 Hz</output>
+            </label>
+            <input type="range" id="voice-1-cutoff" min="200" max="10000" step="10" value="4000" data-voice="1" data-param="cutoff">
+          </div>
+          <div class="slider">
+            <label>
+              Resonance
+              <output id="voice-1-res-val">0.7</output>
+            </label>
+            <input type="range" id="voice-1-res" min="0.1" max="10" step="0.1" value="0.7" data-voice="1" data-param="resonance">
+          </div>
+        </article>
+
+        <article class="voice-card" data-voice="2">
+          <header>
+            <span>Voice 3</span>
+            <button id="voice-2-mute" class="mute-btn" type="button" aria-pressed="false" title="Mute voice 3">M</button>
+            <span id="voice-2-freq" class="voice-freq">230.4 Hz</span>
+          </header>
+          <label>
+            Waveform
+            <select id="voice-2-waveform" data-voice="2" data-param="waveform">
+              <option value="sawtooth">Sawtooth</option>
+              <option value="sine">Sine</option>
+              <option value="triangle">Triangle</option>
+              <option value="square">Square</option>
+            </select>
+          </label>
+          <div class="slider">
+            <label for="voice-2-pan">
+              Pan
+              <output id="voice-2-pan-val">0.25</output>
+            </label>
+            <input type="range" id="voice-2-pan" min="-1" max="1" step="0.01" value="0.25" data-voice="2" data-param="pan">
+          </div>
+          <div class="slider">
+            <label for="voice-2-gain">
+              Gain
+              <output id="voice-2-gain-val">0.16</output>
+            </label>
+            <input type="range" id="voice-2-gain" min="0" max="0.5" step="0.01" value="0.16" data-voice="2" data-param="gain">
+          </div>
+          <div class="slider">
+            <label>
+              LP Cutoff
+              <output id="voice-2-cutoff-val">4000 Hz</output>
+            </label>
+            <input type="range" id="voice-2-cutoff" min="200" max="10000" step="10" value="4000" data-voice="2" data-param="cutoff">
+          </div>
+          <div class="slider">
+            <label>
+              Resonance
+              <output id="voice-2-res-val">0.7</output>
+            </label>
+            <input type="range" id="voice-2-res" min="0.1" max="10" step="0.1" value="0.7" data-voice="2" data-param="resonance">
+          </div>
+        </article>
+
+        <article class="voice-card" data-voice="3">
+          <header>
+            <span>Voice 4</span>
+            <button id="voice-3-mute" class="mute-btn" type="button" aria-pressed="false" title="Mute voice 4">M</button>
+            <span id="voice-3-freq" class="voice-freq">165.0 Hz</span>
+          </header>
+          <label>
+            Waveform
+            <select id="voice-3-waveform" data-voice="3" data-param="waveform">
+              <option value="sine">Sine</option>
+              <option value="triangle">Triangle</option>
+              <option value="sawtooth">Sawtooth</option>
+              <option value="square">Square</option>
+            </select>
+          </label>
+          <div class="slider">
+            <label for="voice-3-pan">
+              Pan
+              <output id="voice-3-pan-val">0.60</output>
+            </label>
+            <input type="range" id="voice-3-pan" min="-1" max="1" step="0.01" value="0.6" data-voice="3" data-param="pan">
+          </div>
+          <div class="slider">
+            <label for="voice-3-gain">
+              Gain
+              <output id="voice-3-gain-val">0.14</output>
+            </label>
+            <input type="range" id="voice-3-gain" min="0" max="0.5" step="0.01" value="0.14" data-voice="3" data-param="gain">
+          </div>
+          <div class="slider">
+            <label>
+              LP Cutoff
+              <output id="voice-3-cutoff-val">4000 Hz</output>
+            </label>
+            <input type="range" id="voice-3-cutoff" min="200" max="10000" step="10" value="4000" data-voice="3" data-param="cutoff">
+          </div>
+          <div class="slider">
+            <label>
+              Resonance
+              <output id="voice-3-res-val">0.7</output>
+            </label>
+            <input type="range" id="voice-3-res" min="0.1" max="10" step="0.1" value="0.7" data-voice="3" data-param="resonance">
+          </div>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer id="page-footer"></footer>
+  <footer id="perf-footer"><span id="perf-stats">CPU: -- % | FPS: --</span></footer>
+</body>
+</html>

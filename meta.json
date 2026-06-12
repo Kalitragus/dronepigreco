@@ -1,0 +1,5 @@
+{
+  "main_functions": {
+    "pigreco": "Return π plus a small dict of harmonic ratios for drone tuning."
+  }
+}
