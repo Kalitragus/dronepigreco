@@ -416,6 +416,33 @@
       align-items: center;
     }
 
+    #visualCanvas {
+      display: block;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: #05070b;
+      border-radius: 12px;
+      border: 1px solid rgba(90, 209, 255, 0.18);
+    }
+
+    #visualCanvas:fullscreen {
+      border-radius: 0;
+      border: none;
+    }
+
+    #visualFullscreenBtn {
+      border: 1px solid rgba(90, 209, 255, 0.4);
+      background: var(--accent-soft);
+      color: var(--accent);
+      border-radius: 999px;
+      padding: 0.6rem 1.4rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+    }
+
     .studio-panel {
       display: flex;
       flex-direction: column;
@@ -453,6 +480,7 @@
     <button class="tab-btn" data-tab="granulone-panel" type="button">Granulone</button>
     <button class="tab-btn" data-tab="bass-panel" type="button">Basso</button>
     <button class="tab-btn" data-tab="drums-panel" type="button">Drums</button>
+    <button class="tab-btn" data-tab="visual-panel" type="button">Visual</button>
     <div id="transport" title="Clock condiviso di basso e batteria">
       <button id="clockPlayBtn" class="studio-action" type="button">&#9654;</button>
       <input type="number" id="bpmInput" min="40" max="220" value="110">
@@ -477,6 +505,7 @@
   <div id="granulone-panel" class="studio-panel" hidden></div>
   <div id="bass-panel" class="studio-panel" hidden></div>
   <div id="drums-panel" class="studio-panel" hidden></div>
+  <div id="visual-panel" class="studio-panel" hidden></div>
 
   <script>
     // Opened by double-clicking the file: modules and fetch are blocked on

@@ -12,25 +12,25 @@ const PARAM_DEFS = [
   ["accent", "Accent", 0, 1, 0.01],
   ["cutoff", "Cutoff (Hz)", 200, 4000, 10],
   ["attack", "Attack (s)", 0.001, 0.3, 0.001],
-  ["decay", "Decay (s)", 0.05, 0.6, 0.01],
+  ["decay", "Decay (s)", 0.05, 1.2, 0.01],
   ["envFilter", "Env→Filtro", 0, 1, 0.01],
   ["fx", "Flanger", 0, 1, 0.01]
 ];
 
 // Preset di genere: stessi 8 parametri, caratteri molto diversi.
 const BASS_PRESETS = {
-  "Acid Line": { level: 0.55, density: 0.8, drift: 0.7, gravity: 0.35, slide: 0.65, accent: 0.7, cutoff: 1400, attack: 0.002, decay: 0.14, envFilter: 0.8, fx: 0 },
-  "Dub Foundation": { level: 0.65, density: 0.45, drift: 0.2, gravity: 0.85, slide: 0.2, accent: 0.2, cutoff: 380, attack: 0.02, decay: 0.42, envFilter: 0.3, fx: 0.15 },
-  "Techno Rolling": { level: 0.6, density: 0.9, drift: 0.25, gravity: 0.7, slide: 0.1, accent: 0.45, cutoff: 800, attack: 0.002, decay: 0.12, envFilter: 0.5, fx: 0 },
-  "Deep House Groove": { level: 0.58, density: 0.55, drift: 0.35, gravity: 0.6, slide: 0.3, accent: 0.4, cutoff: 650, attack: 0.005, decay: 0.22, envFilter: 0.45, fx: 0.1 },
-  "Drone Root": { level: 0.6, density: 0.3, drift: 0.05, gravity: 1, slide: 0.5, accent: 0.1, cutoff: 420, attack: 0.08, decay: 0.55, envFilter: 0.25, fx: 0.25 },
-  "Funk Walker": { level: 0.55, density: 0.75, drift: 0.6, gravity: 0.45, slide: 0.25, accent: 0.65, cutoff: 1100, attack: 0.002, decay: 0.15, envFilter: 0.6, fx: 0 },
-  "Ambient Pulse": { level: 0.5, density: 0.35, drift: 0.3, gravity: 0.75, slide: 0.55, accent: 0.15, cutoff: 500, attack: 0.12, decay: 0.5, envFilter: 0.3, fx: 0.35 },
-  "Electro Snap": { level: 0.55, density: 0.65, drift: 0.5, gravity: 0.5, slide: 0.05, accent: 0.8, cutoff: 1800, attack: 0.001, decay: 0.1, envFilter: 0.9, fx: 0 },
-  "Dungeon Crawl": { level: 0.6, density: 0.5, drift: 0.8, gravity: 0.3, slide: 0.4, accent: 0.5, cutoff: 300, attack: 0.01, decay: 0.3, envFilter: 0.5, fx: 0.2 },
-  "Liquid DnB": { level: 0.5, density: 0.85, drift: 0.45, gravity: 0.55, slide: 0.45, accent: 0.55, cutoff: 950, attack: 0.002, decay: 0.1, envFilter: 0.55, fx: 0.3 },
-  "Random Madness": { level: 0.5, density: 0.95, drift: 1, gravity: 0.1, slide: 0.6, accent: 0.6, cutoff: 2400, attack: 0.004, decay: 0.18, envFilter: 0.7, fx: 0.4 },
-  "Flanger-Phaser Glitch": { level: 0.52, density: 0.7, drift: 0.85, gravity: 0.25, slide: 0.15, accent: 0.75, cutoff: 2200, attack: 0.001, decay: 0.08, envFilter: 0.85, fx: 0.9 }
+  "Acid Line": { level: 0.55, density: 0.8, drift: 0.7, gravity: 0.35, slide: 0.65, accent: 0.7, cutoff: 1400, attack: 0.002, decay: 0.22, envFilter: 0.8, fx: 0 },
+  "Dub Foundation": { level: 0.65, density: 0.45, drift: 0.2, gravity: 0.85, slide: 0.2, accent: 0.2, cutoff: 380, attack: 0.02, decay: 0.7, envFilter: 0.3, fx: 0.15 },
+  "Techno Rolling": { level: 0.6, density: 0.9, drift: 0.25, gravity: 0.7, slide: 0.1, accent: 0.45, cutoff: 800, attack: 0.002, decay: 0.2, envFilter: 0.5, fx: 0 },
+  "Deep House Groove": { level: 0.58, density: 0.55, drift: 0.35, gravity: 0.6, slide: 0.3, accent: 0.4, cutoff: 650, attack: 0.005, decay: 0.35, envFilter: 0.45, fx: 0.1 },
+  "Drone Root": { level: 0.6, density: 0.3, drift: 0.05, gravity: 1, slide: 0.5, accent: 0.1, cutoff: 420, attack: 0.08, decay: 1.0, envFilter: 0.25, fx: 0.25 },
+  "Funk Walker": { level: 0.55, density: 0.75, drift: 0.6, gravity: 0.45, slide: 0.25, accent: 0.65, cutoff: 1100, attack: 0.002, decay: 0.24, envFilter: 0.6, fx: 0 },
+  "Ambient Pulse": { level: 0.5, density: 0.35, drift: 0.3, gravity: 0.75, slide: 0.55, accent: 0.15, cutoff: 500, attack: 0.12, decay: 0.9, envFilter: 0.3, fx: 0.35 },
+  "Electro Snap": { level: 0.55, density: 0.65, drift: 0.5, gravity: 0.5, slide: 0.05, accent: 0.8, cutoff: 1800, attack: 0.001, decay: 0.16, envFilter: 0.9, fx: 0 },
+  "Dungeon Crawl": { level: 0.6, density: 0.5, drift: 0.8, gravity: 0.3, slide: 0.4, accent: 0.5, cutoff: 300, attack: 0.01, decay: 0.5, envFilter: 0.5, fx: 0.2 },
+  "Liquid DnB": { level: 0.5, density: 0.85, drift: 0.45, gravity: 0.55, slide: 0.45, accent: 0.55, cutoff: 950, attack: 0.002, decay: 0.18, envFilter: 0.55, fx: 0.3 },
+  "Random Madness": { level: 0.5, density: 0.95, drift: 1, gravity: 0.1, slide: 0.6, accent: 0.6, cutoff: 2400, attack: 0.004, decay: 0.3, envFilter: 0.7, fx: 0.4 },
+  "Flanger-Phaser Glitch": { level: 0.52, density: 0.7, drift: 0.85, gravity: 0.25, slide: 0.15, accent: 0.75, cutoff: 2200, attack: 0.001, decay: 0.14, envFilter: 0.85, fx: 0.9 }
 };
 
 export function createBassline(ctx, { masterBus, clock, getTonalState }) {
@@ -43,7 +43,7 @@ export function createBassline(ctx, { masterBus, clock, getTonalState }) {
     accent: 0.35,
     cutoff: 900,
     attack: 0.003,
-    decay: 0.18,
+    decay: 0.32,
     envFilter: 0.5,
     fx: 0
   };
@@ -97,6 +97,7 @@ export function createBassline(ctx, { masterBus, clock, getTonalState }) {
 
   let degree = 0;
   let lastFreq = 55;
+  const noteListeners = new Set();
 
   // Piega una frequenza nell'ottava del basso (30-120 Hz).
   function foldToBass(freq) {
@@ -106,21 +107,28 @@ export function createBassline(ctx, { masterBus, clock, getTonalState }) {
     return f;
   }
 
-  // I gradi della scala vengono dalle stesse formule del drone: per la
-  // costante attiva, i rapporti delle 4 voci ripiegati nell'ottava bassa.
+  // I gradi vengono dalle formule del drone (quali intervalli esistono lo
+  // decide la costante attiva), ma ogni grado è SNAPPATO al semitono 12-TET
+  // sulla fondamentale del drone — come il Granulone con Slice Mix al 100%.
+  // È questo che tiene il basso intonato all'orecchio.
   function candidateFreqs() {
     const tonal = typeof getTonalState === "function" ? getTonalState() : null;
     const base = tonal?.baseFrequency || 110;
     const mode = tonal?.currentMode || "PI";
     const usePrimes = !!tonal?.primeMode;
     const root = foldToBass(base);
-    const set = new Set([root]);
+    const semitones = new Set([0]);
     if (typeof window !== "undefined" && typeof window.pigreco === "function") {
       for (let i = 0; i < 4; i++) {
-        set.add(foldToBass(window.pigreco(base, i, { usePrimes, mode })));
+        const folded = foldToBass(window.pigreco(base, i, { usePrimes, mode }));
+        const semi = Math.round(12 * Math.log2(folded / root));
+        semitones.add(((semi % 12) + 12) % 12);
       }
     }
-    return { root, degrees: Array.from(set).sort((a, b) => a - b) };
+    const degrees = Array.from(semitones)
+      .sort((a, b) => a - b)
+      .map(semi => root * Math.pow(2, semi / 12));
+    return { root, degrees };
   }
 
   function onStep(time) {
@@ -165,7 +173,7 @@ export function createBassline(ctx, { masterBus, clock, getTonalState }) {
       vca.gain.linearRampToValueAtTime(peak, time + attack);
     }
     const decayStart = time + Math.max(dur, attack + 0.01);
-    vca.gain.setTargetAtTime(0.0001, decayStart, 0.05);
+    vca.gain.setTargetAtTime(0.0001, decayStart, 0.12);
 
     const maxBoost = accent ? 3.2 : 1.8;
     const envAmt = 1 + (maxBoost - 1) * params.envFilter;
@@ -173,6 +181,14 @@ export function createBassline(ctx, { masterBus, clock, getTonalState }) {
     filter.frequency.setValueAtTime(params.cutoff, time);
     filter.frequency.linearRampToValueAtTime(Math.min(9000, params.cutoff * envAmt), time + attack);
     filter.frequency.setTargetAtTime(params.cutoff, time + attack, dur * 0.6);
+
+    noteListeners.forEach(fn => {
+      try {
+        fn({ freq, accent, slide, degree: Math.abs(degree), time });
+      } catch (error) {
+        console.error(error);
+      }
+    });
   }
 
   clock.subscribe(onStep);
@@ -261,5 +277,12 @@ export function createBassline(ctx, { masterBus, clock, getTonalState }) {
     return true;
   }
 
-  return { output, mount, getState, applyState };
+  // Le note (freq, accent, grado, tempo audio) sono osservabili dall'esterno:
+  // i visual le usano per pilotare la palette di colori.
+  function onNote(fn) {
+    noteListeners.add(fn);
+    return () => noteListeners.delete(fn);
+  }
+
+  return { output, mount, getState, applyState, onNote };
 }

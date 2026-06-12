@@ -5,6 +5,7 @@ import GranularEngine from "./granulone/src/granularEngine.js";
 import { setupUI } from "./granulone/src/ui.js";
 import { createBassline } from "./bassline.js";
 import { createMosquitoDrums } from "./mosquito_drums.js";
+import { createVisual } from "./visual.js";
 
 // ---------------------------------------------------------------------------
 // Shared audio: ONE context, one master bus, one safety limiter.
@@ -894,6 +895,19 @@ function initStudioPresets() {
     registerCascadeSend("drums", drums.output, getCascadeAmount());
     drums.onHit(handleDrumHit);
     window.DrumsAPI = drums;
+
+    // Analyser sul granulone per i visual: legge soltanto, non altera il suono.
+    const granAnalyser = ctx.createAnalyser();
+    granAnalyser.fftSize = 256;
+    engine.masterGain.connect(granAnalyser);
+    const visual = createVisual(ctx, {
+      getTonalState: () => window.DroneAPI?.getState?.() ?? null,
+      getDroneOutput: () => window.DroneAPI?.getOutput?.() ?? null,
+      granAnalyser,
+      bass,
+      drums
+    });
+    visual.mount(document.getElementById("visual-panel"));
 
     initTabs();
     initTransport();
