@@ -231,6 +231,21 @@
         font-style: italic;
       }
 
+      #credit-footer {
+        position: fixed;
+        bottom: 4px;
+        right: 8px;
+        font-family: monospace;
+        font-size: 0.75em;
+        color: #8892a6;
+        background: rgba(20, 24, 30, 0.7);
+        padding: 2px 6px;
+        border-radius: 4px;
+        z-index: 10;
+        pointer-events: none;
+        user-select: none;
+      }
+
       @media (max-width: 720px) {
         body {
           padding: 18px;
@@ -433,6 +448,8 @@
         </div>
       </article>
     </template>
+
+    <footer id="credit-footer">Created by Giovanni Barbieri</footer>
 
     <script type="module" src="./src/app.js"></script>
     <script>
