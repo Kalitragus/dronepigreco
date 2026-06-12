@@ -142,6 +142,25 @@
   <div id="drone-panel" class="studio-panel" hidden></div>
   <div id="granulone-panel" class="studio-panel" hidden></div>
 
+  <script>
+    // Opened by double-clicking the file: modules and fetch are blocked on
+    // file://, so explain how to start instead of hanging on "Caricamento".
+    if (location.protocol === "file:") {
+      document.addEventListener("DOMContentLoaded", () => {
+        const el = document.getElementById("studio-loading");
+        if (el) {
+          el.innerHTML =
+            "Lo Studio non può partire aprendo il file direttamente.<br><br>" +
+            "Chiudi questa pagina e fai doppio clic su <strong>“Avvia Studio.command”</strong> " +
+            "nella cartella del progetto: avvia tutto da solo e apre il browser.";
+          el.style.color = "#ffb86b";
+          el.style.textTransform = "none";
+          el.style.letterSpacing = "0.02em";
+          el.style.lineHeight = "1.7";
+        }
+      });
+    }
+  </script>
   <script type="module" src="studio.js"></script>
 </body>
 </html>
