@@ -465,13 +465,6 @@ export default class GranularEngine {
       this._stopMainSamplePlayback();
     }
     const startTime = this.audioContext.currentTime;
-    const interval = this._computeSliceInterval(slice);
-
-    if (!Number.isFinite(interval) || interval <= 0) {
-      this._sliceTimers.set(slice.id, now + 0.05);
-      return;
-    }
-
     this.slices.forEach(slice => {
       this._sliceTimers.set(slice.id, startTime);
     });
@@ -826,6 +819,11 @@ export default class GranularEngine {
       this.lfoGain.gain.setTargetAtTime(depth, now, 0.05);
     }
 
+    // Suspending the context is a cheap "mute all" only when the context is
+    // private; on a shared context (studio shell) it would kill other synths.
+    const sharedCtx = typeof window !== "undefined" ? window.SharedAudio?.ctx : null;
+    const ownsContext = this.audioContext !== sharedCtx;
+    if (!ownsContext) return;
     if (shouldMuteMaster && this.audioContext.state === "running") {
       this.audioContext.suspend().catch(() => {});
     } else if (!shouldMuteMaster && this.audioContext.state === "suspended") {
