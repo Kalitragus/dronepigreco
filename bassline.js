@@ -11,8 +11,25 @@ const PARAM_DEFS = [
   ["slide", "Slide", 0, 1, 0.01],
   ["accent", "Accent", 0, 1, 0.01],
   ["cutoff", "Cutoff (Hz)", 200, 4000, 10],
-  ["decay", "Decay (s)", 0.05, 0.6, 0.01]
+  ["decay", "Decay (s)", 0.05, 0.6, 0.01],
+  ["fx", "Flanger", 0, 1, 0.01]
 ];
+
+// Preset di genere: stessi 8 parametri, caratteri molto diversi.
+const BASS_PRESETS = {
+  "Acid Line": { level: 0.55, density: 0.8, drift: 0.7, gravity: 0.35, slide: 0.65, accent: 0.7, cutoff: 1400, decay: 0.14, fx: 0 },
+  "Dub Foundation": { level: 0.65, density: 0.45, drift: 0.2, gravity: 0.85, slide: 0.2, accent: 0.2, cutoff: 380, decay: 0.42, fx: 0.15 },
+  "Techno Rolling": { level: 0.6, density: 0.9, drift: 0.25, gravity: 0.7, slide: 0.1, accent: 0.45, cutoff: 800, decay: 0.12, fx: 0 },
+  "Deep House Groove": { level: 0.58, density: 0.55, drift: 0.35, gravity: 0.6, slide: 0.3, accent: 0.4, cutoff: 650, decay: 0.22, fx: 0.1 },
+  "Drone Root": { level: 0.6, density: 0.3, drift: 0.05, gravity: 1, slide: 0.5, accent: 0.1, cutoff: 420, decay: 0.55, fx: 0.25 },
+  "Funk Walker": { level: 0.55, density: 0.75, drift: 0.6, gravity: 0.45, slide: 0.25, accent: 0.65, cutoff: 1100, decay: 0.15, fx: 0 },
+  "Ambient Pulse": { level: 0.5, density: 0.35, drift: 0.3, gravity: 0.75, slide: 0.55, accent: 0.15, cutoff: 500, decay: 0.5, fx: 0.35 },
+  "Electro Snap": { level: 0.55, density: 0.65, drift: 0.5, gravity: 0.5, slide: 0.05, accent: 0.8, cutoff: 1800, decay: 0.1, fx: 0 },
+  "Dungeon Crawl": { level: 0.6, density: 0.5, drift: 0.8, gravity: 0.3, slide: 0.4, accent: 0.5, cutoff: 300, decay: 0.3, fx: 0.2 },
+  "Liquid DnB": { level: 0.5, density: 0.85, drift: 0.45, gravity: 0.55, slide: 0.45, accent: 0.55, cutoff: 950, decay: 0.1, fx: 0.3 },
+  "Random Madness": { level: 0.5, density: 0.95, drift: 1, gravity: 0.1, slide: 0.6, accent: 0.6, cutoff: 2400, decay: 0.18, fx: 0.4 },
+  "Flanger-Phaser Glitch": { level: 0.52, density: 0.7, drift: 0.85, gravity: 0.25, slide: 0.15, accent: 0.75, cutoff: 2200, decay: 0.08, fx: 0.9 }
+};
 
 export function createBassline(ctx, { masterBus, clock, getTonalState }) {
   const params = {
@@ -23,7 +40,8 @@ export function createBassline(ctx, { masterBus, clock, getTonalState }) {
     slide: 0.3,
     accent: 0.35,
     cutoff: 900,
-    decay: 0.18
+    decay: 0.18,
+    fx: 0
   };
 
   const output = ctx.createGain();
@@ -47,9 +65,29 @@ export function createBassline(ctx, { masterBus, clock, getTonalState }) {
   const subGain = ctx.createGain();
   subGain.gain.value = 0.55;
 
+  // Flanger-phaser: delay corto modulato da un LFO con feedback, in
+  // parallelo al segnale dry. La manopola FX dosa wet e feedback.
+  const flangerDelay = ctx.createDelay(0.05);
+  flangerDelay.delayTime.value = 0.004;
+  const flangerFeedback = ctx.createGain();
+  flangerFeedback.gain.value = 0;
+  const flangerWet = ctx.createGain();
+  flangerWet.gain.value = 0;
+  const flangerLfo = ctx.createOscillator();
+  flangerLfo.type = "sine";
+  flangerLfo.frequency.value = 0.35;
+  const flangerLfoGain = ctx.createGain();
+  flangerLfoGain.gain.value = 0.002;
+  flangerLfo.connect(flangerLfoGain).connect(flangerDelay.delayTime);
+  flangerDelay.connect(flangerFeedback).connect(flangerDelay);
+  flangerLfo.start();
+
   osc.connect(vca);
   sub.connect(subGain).connect(vca);
-  vca.connect(filter).connect(output);
+  vca.connect(filter);
+  filter.connect(output);
+  filter.connect(flangerDelay);
+  flangerDelay.connect(flangerWet).connect(output);
   osc.start();
   sub.start();
 
@@ -135,8 +173,13 @@ export function createBassline(ctx, { masterBus, clock, getTonalState }) {
 
   function applyParam(key, value) {
     params[key] = value;
+    const now = ctx.currentTime;
     if (key === "level") {
-      output.gain.setTargetAtTime(value, ctx.currentTime, 0.05);
+      output.gain.setTargetAtTime(value, now, 0.05);
+    } else if (key === "fx") {
+      flangerWet.gain.setTargetAtTime(value * 0.7, now, 0.1);
+      flangerFeedback.gain.setTargetAtTime(value * 0.62, now, 0.1);
+      flangerLfo.frequency.setTargetAtTime(0.25 + value * 1.4, now, 0.1);
     }
   }
 
@@ -150,7 +193,26 @@ export function createBassline(ctx, { masterBus, clock, getTonalState }) {
         (e sulla griglia dei primi se Prime Quantization è accesa).
         Parte e si ferma con ▶ nella barra in alto.
       </p>
+      <div class="param bass-preset-row">
+        <label>Preset<output></output></label>
+        <select class="bass-preset"></select>
+      </div>
       <div class="param-grid"></div>`;
+    const presetSelect = section.querySelector(".bass-preset");
+    const placeholder = document.createElement("option");
+    placeholder.value = "";
+    placeholder.textContent = "— scegli un carattere —";
+    presetSelect.appendChild(placeholder);
+    Object.keys(BASS_PRESETS).forEach(name => {
+      const option = document.createElement("option");
+      option.value = name;
+      option.textContent = name;
+      presetSelect.appendChild(option);
+    });
+    presetSelect.addEventListener("change", () => {
+      const preset = BASS_PRESETS[presetSelect.value];
+      if (preset) applyState(preset);
+    });
     const grid = section.querySelector(".param-grid");
     PARAM_DEFS.forEach(([key, label, min, max, step]) => {
       const wrap = document.createElement("div");

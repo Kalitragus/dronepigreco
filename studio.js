@@ -345,9 +345,29 @@ function pourCascadeIntoGranulone() {
     fileInput.dispatchEvent(new Event("change", { bubbles: true }));
     activateTab("granulone-panel");
     status("Cascata riversata nel Granulone");
+    autoPlayGranulone();
   } catch (error) {
     console.error(error);
     status("Impossibile passare il take al Granulone", true);
+  }
+}
+
+// Dopo il riversamento il decode è asincrono: appena la slice esiste,
+// Granulone parte da solo (engine.play è idempotente se già in play).
+function autoPlayGranulone(attempt = 0) {
+  const engine = window.GranuloneAPI?.engine;
+  if (!engine || engine.isPlaying) return;
+  if (engine.slices?.length) {
+    try {
+      engine.play();
+      status("Cascata riversata: Granulone in play");
+    } catch (error) {
+      console.error(error);
+    }
+    return;
+  }
+  if (attempt < 25) {
+    setTimeout(() => autoPlayGranulone(attempt + 1), 200);
   }
 }
 
@@ -469,7 +489,7 @@ function initDelaySync() {
 // ---------------------------------------------------------------------------
 // First-run tutorial: short guided tour of the macro functions.
 // ---------------------------------------------------------------------------
-const TOUR_KEY = "dronepigreco.studio.tour.v1";
+const TOUR_KEY = "dronepigreco.studio.tour.v2";
 const TOUR_STEPS = [
   {
     tab: "drone-panel",
@@ -509,9 +529,27 @@ const TOUR_STEPS = [
   },
   {
     tab: null,
+    target: "#transport",
+    title: "La sezione ritmica",
+    text: "▶ avvia il clock condiviso: Basso e Drums partono insieme, sul BPM che imposti qui. Il valore del BPM guida anche il Delay Sync delle slice del Granulone."
+  },
+  {
+    tab: "bass-panel",
+    target: "#bass-panel .bass-preset",
+    title: "Basso Stocastico",
+    text: "Un random walk intonato dal drone: scegli un preset di genere per partire, poi scolpisci con Density (note/pause), Drift (quanto vaga) e Gravity (attrazione alla fondamentale). Con Prime Quantization attiva segue la griglia dei primi."
+  },
+  {
+    tab: "drums-panel",
+    target: "#swarmCanvas",
+    title: "Mosquito Drums",
+    text: "Lo sciame decide i colpi: ogni colonna del display è una voce (Kick, Snare, Hat, Perc). Clicca sul display per spostare la luce e far migrare il groove; il pulsante rosso PANIC scatena un fill. Ogni voce ha Level, Tune, Filtro e Decay."
+  },
+  {
+    tab: null,
     target: null,
     title: "Tutto qui",
-    text: "Prime Quantization sul drone intona automaticamente anche il Granulone; Export Studio salva tutto in un file. Rivedi questo tour quando vuoi con il pulsante «?» qui sopra."
+    text: "Prime Quantization sul drone intona Granulone e basso; la Cascata riversa tutto nel Granulone; Export Studio salva l'intero set in un file. Rivedi questo tour quando vuoi con il pulsante «?» qui sopra."
   }
 ];
 
