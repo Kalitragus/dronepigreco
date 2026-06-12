@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Studio · Drone π + Granulone</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: "Inter", "Segoe UI", sans-serif;
+      background: #0a0c12;
+      color: #ecf3ff;
+      --accent: #5ad1ff;
+      --accent-soft: rgba(90, 209, 255, 0.18);
+      --panel: rgba(22, 26, 35, 0.88);
+      --border: rgba(255, 255, 255, 0.1);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+    }
+
+    #studio-bar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.7rem 1.2rem;
+      background: rgba(12, 15, 22, 0.96);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(8px);
+    }
+
+    #studio-bar .brand {
+      font-size: 0.8rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(236, 243, 255, 0.55);
+      margin-right: 0.6rem;
+    }
+
+    .tab-btn {
+      border: 1px solid var(--border);
+      background: transparent;
+      color: rgba(236, 243, 255, 0.65);
+      border-radius: 999px;
+      padding: 0.5rem 1.3rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    .tab-btn.active {
+      background: var(--accent-soft);
+      border-color: rgba(90, 209, 255, 0.4);
+      color: var(--accent);
+    }
+
+    #studio-bar .spacer {
+      flex: 1;
+    }
+
+    .studio-action {
+      border: 1px solid var(--border);
+      background: transparent;
+      color: rgba(236, 243, 255, 0.7);
+      border-radius: 999px;
+      padding: 0.45rem 1rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+    }
+
+    .studio-action:hover {
+      color: var(--accent);
+      border-color: rgba(90, 209, 255, 0.4);
+    }
+
+    #studio-status {
+      font-size: 0.75rem;
+      color: rgba(236, 243, 255, 0.55);
+      letter-spacing: 0.04em;
+      min-height: 1em;
+    }
+
+    .studio-panel {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1.5rem 2.5rem;
+      gap: 2rem;
+    }
+
+    .studio-panel[hidden] {
+      display: none;
+    }
+
+    #studio-loading {
+      padding: 3rem;
+      text-align: center;
+      color: rgba(236, 243, 255, 0.6);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-size: 0.85rem;
+    }
+
+    /* Granulone base look inside its panel (its body/:root rules can't apply here) */
+    #granulone-panel {
+      align-items: stretch;
+      gap: 24px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+<body>
+  <nav id="studio-bar">
+    <span class="brand">Studio</span>
+    <button class="tab-btn active" data-tab="drone-panel" type="button">Drone π</button>
+    <button class="tab-btn" data-tab="granulone-panel" type="button">Granulone</button>
+    <span class="spacer"></span>
+    <span id="studio-status"></span>
+    <button id="studioSaveBtn" class="studio-action" type="button" title="Esporta lo stato di entrambi i synth in un file">Export Studio</button>
+    <label for="studioImportInput" class="studio-action" title="Importa un file di preset studio">Import Studio</label>
+    <input type="file" id="studioImportInput" hidden>
+  </nav>
+
+  <div id="studio-loading">Caricamento synth…</div>
+  <div id="drone-panel" class="studio-panel" hidden></div>
+  <div id="granulone-panel" class="studio-panel" hidden></div>
+
+  <script type="module" src="studio.js"></script>
+</body>
+</html>

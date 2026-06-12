@@ -178,12 +178,19 @@ function buildModeButtons() {
 
 function ensureAudioContext() {
   if (!audioCtx) {
-    const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
-    try {
-      // "playback" trades latency for a larger buffer: fewer underruns on mobile.
-      audioCtx = new AudioContextCtor({ latencyHint: "playback" });
-    } catch (error) {
-      audioCtx = new AudioContextCtor();
+    // A host page (studio shell) can provide a shared context and master bus
+    // via window.SharedAudio; never create a second AudioContext beside it.
+    const shared = window.SharedAudio;
+    if (shared?.ctx) {
+      audioCtx = shared.ctx;
+    } else {
+      const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
+      try {
+        // "playback" trades latency for a larger buffer: fewer underruns on mobile.
+        audioCtx = new AudioContextCtor({ latencyHint: "playback" });
+      } catch (error) {
+        audioCtx = new AudioContextCtor();
+      }
     }
     window.audioCtx = audioCtx;
     masterGain = audioCtx.createGain();
@@ -194,17 +201,23 @@ function ensureAudioContext() {
     tailFeedbackGain.gain.value = 0.25;
     tailDelay.connect(tailFeedbackGain).connect(tailDelay);
 
-    safetyLimiter = audioCtx.createDynamicsCompressor();
-    safetyLimiter.threshold.value = -9;
-    safetyLimiter.knee.value = 6;
-    safetyLimiter.ratio.value = 16;
-    safetyLimiter.attack.value = 0.002;
-    safetyLimiter.release.value = 0.25;
-    safetyLimiter.connect(audioCtx.destination);
+    let outputBus;
+    if (shared?.masterBus) {
+      outputBus = shared.masterBus;
+    } else {
+      safetyLimiter = audioCtx.createDynamicsCompressor();
+      safetyLimiter.threshold.value = -9;
+      safetyLimiter.knee.value = 6;
+      safetyLimiter.ratio.value = 16;
+      safetyLimiter.attack.value = 0.002;
+      safetyLimiter.release.value = 0.25;
+      safetyLimiter.connect(audioCtx.destination);
+      outputBus = safetyLimiter;
+    }
 
     masterGain.connect(tailDelay);
-    masterGain.connect(safetyLimiter);
-    tailDelay.connect(safetyLimiter);
+    masterGain.connect(outputBus);
+    tailDelay.connect(outputBus);
 
     impulseBuffer = createImpulseResponse(audioCtx, 1.6, 2.3);
     piFxModule = new PiFX(audioCtx);
@@ -1277,11 +1290,17 @@ window.DroneAPI = {
   modes: Object.keys(MODE_IDS)
 };
 
-document.addEventListener("DOMContentLoaded", () => {
+function bootstrapDrone() {
   const built = buildModeButtons();
   if (!built) {
     setTimeout(buildModeButtons, 100);
   }
   bindUI();
   initializeDisplays();
-});
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", bootstrapDrone);
+} else {
+  bootstrapDrone();
+}

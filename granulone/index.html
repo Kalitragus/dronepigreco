@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Granulone</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: #0f1115;
+        color: #f0f3f7;
+      }
+
+      body {
+        margin: 0;
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+        min-height: 100vh;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 1.8rem;
+        letter-spacing: 0.04em;
+      }
+
+      section {
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.15);
+      }
+
+      button,
+      input,
+      select {
+        font: inherit;
+      }
+
+      .file-loader label {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .file-loader input[type="file"] {
+        display: inline-block;
+      }
+
+      .waveform-wrapper {
+        position: relative;
+      }
+
+      canvas {
+        width: 100%;
+        height: 160px;
+        background: #12151d;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+      }
+
+      .global-controls,
+      .slice-controls,
+      .slice-header {
+        display: grid;
+        gap: 12px;
+      }
+
+      .global-controls {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        align-items: end;
+      }
+
+      .control {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        font-size: 0.9rem;
+      }
+
+      .control input[type="range"] {
+        width: 100%;
+      }
+
+      .control output {
+        font-size: 0.8rem;
+        opacity: 0.8;
+      }
+
+      .control-primary {
+        padding: 12px;
+        border-radius: 12px;
+        border: 1px solid rgba(79, 195, 247, 0.25);
+        background: rgba(79, 195, 247, 0.08);
+      }
+
+      .control-toggle {
+        flex-direction: row;
+      }
+
+      .control-toggle .toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+      }
+
+      .control-toggle input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+      }
+
+      .slices {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .slice-card {
+        background: rgba(10, 12, 18, 0.9);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 14px;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .slice-card.is-active {
+        border-color: rgba(79, 195, 247, 0.6);
+        box-shadow: 0 0 0 1px rgba(79, 195, 247, 0.25);
+      }
+
+      .slice-card.is-selected {
+        box-shadow: 0 0 0 2px rgba(79, 195, 247, 0.35);
+      }
+
+      .slice-card.is-muted {
+        opacity: 0.55;
+        border-color: rgba(255, 255, 255, 0.12);
+      }
+
+      .slice-header {
+        grid-template-columns: minmax(0, 1fr) auto auto auto;
+        gap: 12px;
+      }
+
+      .slice-header .slice-name {
+        min-width: 0;
+        width: 100%;
+        max-width: 160px;
+      }
+
+      .slice-controls {
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      }
+
+      .slice-header button {
+        padding: 6px 12px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        background: transparent;
+        color: inherit;
+        cursor: pointer;
+      }
+
+      .slice-header .mute-slice {
+        border-color: rgba(79, 195, 247, 0.5);
+        color: #4fc3f7;
+      }
+
+      .primary-btn {
+        background: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%);
+        border: none;
+        color: #fff;
+        font-weight: 600;
+        padding: 10px 16px;
+        border-radius: 999px;
+        cursor: pointer;
+        transition: transform 0.2s ease;
+      }
+
+      .primary-btn:hover {
+        transform: translateY(-1px);
+      }
+
+      .danger-btn {
+        color: #ff7f7f;
+        border-color: rgba(255, 127, 127, 0.4);
+      }
+
+      .transport {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+      }
+
+      .transport button {
+        padding: 10px 18px;
+        border-radius: 999px;
+        border: none;
+        cursor: pointer;
+        background: rgba(255, 255, 255, 0.12);
+        color: inherit;
+        font-weight: 600;
+      }
+
+      .transport button:is(:hover, :focus-visible) {
+        background: rgba(255, 255, 255, 0.2);
+      }
+
+      .transport button.recording {
+        background: rgba(255, 82, 82, 0.25);
+        color: #ff5252;
+      }
+
+      .transport a.download-link {
+        color: #4fc3f7;
+        text-decoration: none;
+        font-size: 0.9rem;
+      }
+
+      .empty-state {
+        opacity: 0.7;
+        font-size: 0.9rem;
+        font-style: italic;
+      }
+
+      @media (max-width: 720px) {
+        body {
+          padding: 18px;
+        }
+
+        .global-controls {
+          grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        }
+
+        .slice-controls {
+          grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Granulone · Campionatore Granulare</h1>
+      <p>Carica un suono, aggiungi slice e scolpisci il paesaggio granulare.</p>
+    </header>
+
+    <section class="file-loader">
+      <label>
+        <span>Carica campione (WAV/AIFF/MP3)</span>
+        <input id="fileInput" type="file" accept="audio/*" />
+      </label>
+    </section>
+
+    <section class="waveform">
+      <div class="waveform-wrapper">
+        <canvas id="waveform" width="1024" height="220"></canvas>
+      </div>
+    </section>
+
+    <section>
+      <div class="transport">
+        <button id="playBtn">Play</button>
+        <button id="granStopBtn">Stop</button>
+        <button id="addSliceBtn" class="primary-btn">+ Slice</button>
+        <button id="recordBtn" hidden>Rec</button>
+        <script>
+          (() => {
+            const btn = document.getElementById("recordBtn");
+            if (!btn) return;
+            const { protocol, hostname } = window.location;
+            const allow =
+              protocol === "file:" ||
+              hostname === "localhost" ||
+              hostname === "127.0.0.1" ||
+              hostname === "::1";
+            if (!allow) {
+              btn.remove();
+            }
+          })();
+        </script>
+        <a id="downloadLink" class="download-link" href="#" download hidden>Scarica ultimo take</a>
+      </div>
+      <div class="global-controls" id="globalControls">
+        <div class="control">
+          <label for="grainInterval">Densità (ms)</label>
+          <input id="grainInterval" type="range" min="10" max="400" step="1" value="180" />
+          <output for="grainInterval">180</output>
+        </div>
+        <div class="control">
+          <label for="grainDuration">Durata grano (ms)</label>
+          <input id="grainDuration" type="range" min="20" max="5000" step="10" value="180" />
+          <output for="grainDuration">180</output>
+        </div>
+        <div class="control">
+          <label for="masterGain">Volume master</label>
+          <input id="masterGain" type="range" min="0" max="100" step="1" value="80" />
+          <output for="masterGain">0.80</output>
+        </div>
+        <div class="control">
+          <label for="lfoSpeed">LFO velocità (Hz)</label>
+          <input id="lfoSpeed" type="range" min="0" max="10" step="0.1" value="0" />
+          <output for="lfoSpeed">0.0</output>
+        </div>
+        <div class="control">
+          <label for="grainWindow">Finestra inviluppo</label>
+          <select id="grainWindow">
+            <option value="hann">Hann</option>
+            <option value="triangular">Triangolare</option>
+            <option value="gaussian">Gaussiana</option>
+            <option value="rectangular">Rettangolare</option>
+          </select>
+        </div>
+        <div class="control">
+          <label for="sliceMix" title="Quantizza il pitch delle slice verso la scala basata sulla Nota fondamentale">Slice Mix (%)</label>
+          <input id="sliceMix" type="range" min="0" max="100" step="1" value="0" />
+          <output for="sliceMix">0%</output>
+        </div>
+        <div class="control">
+          <label for="rootNote">Nota fondamentale</label>
+          <select id="rootNote">
+            <option value="C">Do</option>
+            <option value="C#">Do# / Reb</option>
+            <option value="D">Re</option>
+            <option value="D#">Re# / Mib</option>
+            <option value="E">Mi</option>
+            <option value="F">Fa</option>
+            <option value="F#">Fa# / Solb</option>
+            <option value="G">Sol</option>
+            <option value="G#">Sol# / Lab</option>
+            <option value="A">La</option>
+            <option value="A#">La# / Sib</option>
+          <option value="B">Si</option>
+        </select>
+        </div>
+        <div class="control control-toggle">
+          <label for="muteMainSample" class="toggle">
+            <input id="muteMainSample" type="checkbox" />
+            <span>Mute campione principale</span>
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Slice</h2>
+      <div id="slices" class="slices">
+        <p class="empty-state">Aggiungi uno slice per iniziare.</p>
+      </div>
+    </section>
+
+    <template id="sliceTemplate">
+      <article class="slice-card" data-slice-id="">
+        <div class="slice-header">
+          <input class="slice-name" type="text" value="Slice" />
+          <span class="slice-range"></span>
+          <button class="mute-slice">Mute</button>
+          <button class="remove-slice danger-btn">Elimina</button>
+        </div>
+        <div class="slice-controls">
+          <label class="control control-primary">
+            <span>Pointer (%)</span>
+            <input class="slice-pointer" type="range" min="0" max="100" step="1" value="0" />
+            <output>0%</output>
+          </label>
+          <label class="control control-primary">
+            <span>Random pitch (st)</span>
+            <input class="slice-random-pitch" type="range" min="0" max="1200" step="50" value="0" />
+            <output>0 st</output>
+          </label>
+          <label class="control control-primary">
+            <span>Spray (%)</span>
+            <input class="slice-spray" type="range" min="0" max="100" step="1" value="0" />
+            <output>0%</output>
+          </label>
+          <label class="control control-primary">
+            <span>Spaziatura grani (ms)</span>
+            <input class="slice-grain-interval" type="range" min="10" max="400" step="1" value="180" />
+            <output>180 ms</output>
+          </label>
+          <label class="control">
+            <span>Overlap (%)</span>
+            <input class="slice-overlap" type="range" min="0" max="95" step="1" value="70" />
+            <output>70%</output>
+          </label>
+          <label class="control">
+            <span>Pitch</span>
+            <input class="slice-playback-rate" type="range" min="-1200" max="1200" step="50" value="0" />
+            <output>0 st</output>
+          </label>
+          <label class="control">
+            <span>Start (ms)</span>
+            <input class="slice-start" type="range" min="0" max="0" step="1" value="0" />
+            <output>0 ms</output>
+          </label>
+          <label class="control">
+            <span>End (ms)</span>
+            <input class="slice-end" type="range" min="0" max="0" step="1" value="0" />
+            <output>0 ms</output>
+          </label>
+          <label class="control">
+            <span>Gain (%)</span>
+            <input class="slice-gain" type="range" min="0" max="100" step="1" value="100" />
+            <output>1.00</output>
+          </label>
+          <label class="control">
+            <span>Delay time (ms)</span>
+            <input class="slice-delay-time" type="range" min="0" max="2500" step="10" value="0" />
+            <output>0 ms</output>
+          </label>
+          <label class="control">
+            <span>Delay feedback (%)</span>
+            <input class="slice-delay-feedback" type="range" min="0" max="95" step="1" value="25" />
+            <output>25%</output>
+          </label>
+          <label class="control">
+            <span>Delay mix (%)</span>
+            <input class="slice-delay-mix" type="range" min="0" max="100" step="1" value="0" />
+            <output>0%</output>
+          </label>
+          <label class="control">
+            <span>Reverb mix (%)</span>
+            <input class="slice-reverb-mix" type="range" min="0" max="100" step="1" value="0" />
+            <output>0%</output>
+          </label>
+        </div>
+      </article>
+    </template>
+
+    <script type="module" src="./src/app.js"></script>
+    <script>
+      (() => {
+        const loadFallback = () => {
+          if (window.__granuloneFallbackLoaded) return;
+          window.__granuloneFallbackLoaded = true;
+          const script = document.createElement("script");
+          script.src = "./granulone.fallback.js";
+          script.defer = true;
+          document.head.appendChild(script);
+        };
+
+        if (window.location.protocol === "file:") {
+          loadFallback();
+          return;
+        }
+
+        const verify = () => {
+          if (!window.__granuloneReady) {
+            loadFallback();
+          }
+        };
+
+        document.addEventListener("DOMContentLoaded", verify, { once: true });
+        window.addEventListener("load", () => {
+          if (!window.__granuloneReady) {
+            setTimeout(verify, 0);
+          }
+        });
+      })();
+    </script>
+  </body>
+</html>
