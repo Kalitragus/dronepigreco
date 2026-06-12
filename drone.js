@@ -14,6 +14,7 @@ const defaultVoices = [
 let audioCtx;
 let masterGain;
 let safetyLimiter;
+let droneOutput;
 let impulseBuffer;
 let piFxModule;
 let piReverbModule;
@@ -215,9 +216,13 @@ function ensureAudioContext() {
       outputBus = safetyLimiter;
     }
 
+    // droneOutput carries the complete drone mix (voices + echo tail): it is
+    // the tap point for host pages that chain the drone into other synths.
+    droneOutput = audioCtx.createGain();
     masterGain.connect(tailDelay);
-    masterGain.connect(outputBus);
-    tailDelay.connect(outputBus);
+    masterGain.connect(droneOutput);
+    tailDelay.connect(droneOutput);
+    droneOutput.connect(outputBus);
 
     impulseBuffer = createImpulseResponse(audioCtx, 1.6, 2.3);
     piFxModule = new PiFX(audioCtx);
@@ -1287,7 +1292,9 @@ window.DroneAPI = {
   randomize,
   setMathMode,
   isRunning: () => isRunning,
-  modes: Object.keys(MODE_IDS)
+  modes: Object.keys(MODE_IDS),
+  ensureAudio: ensureAudioContext,
+  getOutput: () => droneOutput
 };
 
 function bootstrapDrone() {

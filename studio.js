@@ -27,8 +27,30 @@ limiter.release.value = 0.25;
 masterBus.connect(limiter);
 limiter.connect(ctx.destination);
 
+// ---------------------------------------------------------------------------
+// Cascade bus: any synth can pour its output here through a per-synth send;
+// what flows in can be recorded and dropped into Granulone as grain material.
+// Future synths: window.SharedAudio.registerCascadeSend(name, outputNode).
+// ---------------------------------------------------------------------------
+const cascadeBus = ctx.createGain();
+const recorderDest = ctx.createMediaStreamDestination();
+cascadeBus.connect(recorderDest);
+const cascadeSends = new Map();
+
+function registerCascadeSend(name, sourceNode, initialGain = 0.8) {
+  let send = cascadeSends.get(name);
+  if (!send) {
+    send = ctx.createGain();
+    send.gain.value = initialGain;
+    sourceNode.connect(send);
+    send.connect(cascadeBus);
+    cascadeSends.set(name, send);
+  }
+  return send;
+}
+
 window.ctx = ctx;
-window.SharedAudio = { ctx, masterBus, limiter };
+window.SharedAudio = { ctx, masterBus, limiter, cascadeBus, registerCascadeSend };
 
 const unlockAudio = () => {
   if (ctx.state === "suspended") {
@@ -106,15 +128,160 @@ async function mountGranulone() {
 // ---------------------------------------------------------------------------
 // Tabs
 // ---------------------------------------------------------------------------
+function activateTab(tabId) {
+  document.querySelectorAll(".tab-btn").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.tab === tabId);
+  });
+  document.querySelectorAll(".studio-panel").forEach(panel => {
+    panel.hidden = panel.id !== tabId;
+  });
+}
+
 function initTabs() {
-  const buttons = Array.from(document.querySelectorAll(".tab-btn"));
-  buttons.forEach(btn => {
-    btn.addEventListener("click", () => {
-      buttons.forEach(other => other.classList.toggle("active", other === btn));
-      document.querySelectorAll(".studio-panel").forEach(panel => {
-        panel.hidden = panel.id !== btn.dataset.tab;
-      });
-    });
+  document.querySelectorAll(".tab-btn").forEach(btn => {
+    btn.addEventListener("click", () => activateTab(btn.dataset.tab));
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Cascata: record the drone send and pour the take into Granulone by
+// injecting it into its own file input — the whole Granulone pipeline
+// (decode, waveform, auto-slice) runs as if the user had picked a file.
+// ---------------------------------------------------------------------------
+let cascadeRecorder = null;
+let cascadeChunks = [];
+let cascadeTimer = null;
+let cascadeStartedAt = 0;
+
+function getCascadeAmount() {
+  const slider = document.getElementById("cascadeAmount");
+  const raw = slider ? parseFloat(slider.value) : 80;
+  return Math.min(1, Math.max(0, raw / 100));
+}
+
+function pickRecordingMimeType() {
+  const candidates = [
+    "audio/webm;codecs=opus",
+    "audio/webm",
+    "audio/ogg;codecs=opus",
+    "audio/mp4"
+  ];
+  return candidates.find(type => MediaRecorder.isTypeSupported(type)) || "";
+}
+
+function setRecButtonState(recording, seconds = 0) {
+  const btn = document.getElementById("cascadeRecBtn");
+  if (!btn) return;
+  btn.classList.toggle("recording", recording);
+  btn.innerHTML = recording
+    ? `&#9632; Stop (${seconds.toFixed(1)}s)`
+    : "&#9679; Riversa";
+}
+
+function startCascadeRecording() {
+  if (typeof MediaRecorder === "undefined") {
+    status("Registrazione non supportata da questo browser", true);
+    return;
+  }
+  if (!window.DroneAPI) {
+    status("Drone non ancora pronto", true);
+    return;
+  }
+  window.DroneAPI.ensureAudio();
+  unlockAudio();
+  const droneOut = window.DroneAPI.getOutput?.();
+  if (!droneOut) {
+    status("Uscita del drone non disponibile", true);
+    return;
+  }
+  if (!window.DroneAPI.isRunning()) {
+    status("Avvia prima il drone: la cascata registra ciò che suona", true);
+    return;
+  }
+  const send = registerCascadeSend("drone", droneOut, getCascadeAmount());
+  send.gain.setTargetAtTime(getCascadeAmount(), ctx.currentTime, 0.05);
+
+  const mimeType = pickRecordingMimeType();
+  try {
+    cascadeRecorder = new MediaRecorder(
+      recorderDest.stream,
+      mimeType ? { mimeType } : undefined
+    );
+  } catch (error) {
+    status("Impossibile avviare la registrazione", true);
+    return;
+  }
+  cascadeChunks = [];
+  cascadeRecorder.ondataavailable = event => {
+    if (event.data && event.data.size) cascadeChunks.push(event.data);
+  };
+  cascadeRecorder.onstop = pourCascadeIntoGranulone;
+  cascadeRecorder.start();
+  cascadeStartedAt = performance.now();
+  setRecButtonState(true, 0);
+  cascadeTimer = setInterval(() => {
+    setRecButtonState(true, (performance.now() - cascadeStartedAt) / 1000);
+  }, 200);
+  status("Cascata in registrazione…");
+}
+
+function stopCascadeRecording() {
+  if (cascadeTimer) {
+    clearInterval(cascadeTimer);
+    cascadeTimer = null;
+  }
+  setRecButtonState(false);
+  if (cascadeRecorder && cascadeRecorder.state !== "inactive") {
+    cascadeRecorder.stop();
+  }
+}
+
+function pourCascadeIntoGranulone() {
+  const type = cascadeRecorder?.mimeType || "audio/webm";
+  const blob = new Blob(cascadeChunks, { type });
+  cascadeChunks = [];
+  cascadeRecorder = null;
+  if (blob.size < 1000) {
+    status("Registrazione troppo corta o vuota", true);
+    return;
+  }
+  const ext = type.includes("mp4") ? "m4a" : type.includes("ogg") ? "ogg" : "webm";
+  const stamp = new Date().toTimeString().slice(0, 8).replaceAll(":", "-");
+  const file = new File([blob], `drone-cascata-${stamp}.${ext}`, { type });
+  const fileInput = document.querySelector("#granulone-panel #fileInput");
+  if (!fileInput) {
+    status("Granulone non pronto", true);
+    return;
+  }
+  try {
+    const transfer = new DataTransfer();
+    transfer.items.add(file);
+    fileInput.files = transfer.files;
+    fileInput.dispatchEvent(new Event("change", { bubbles: true }));
+    activateTab("granulone-panel");
+    status("Cascata riversata nel Granulone");
+  } catch (error) {
+    console.error(error);
+    status("Impossibile passare il take al Granulone", true);
+  }
+}
+
+function initCascade() {
+  const slider = document.getElementById("cascadeAmount");
+  const out = document.getElementById("cascadeVal");
+  slider?.addEventListener("input", () => {
+    if (out) out.textContent = `${slider.value}%`;
+    const send = cascadeSends.get("drone");
+    if (send) {
+      send.gain.setTargetAtTime(getCascadeAmount(), ctx.currentTime, 0.05);
+    }
+  });
+  document.getElementById("cascadeRecBtn")?.addEventListener("click", () => {
+    if (cascadeRecorder && cascadeRecorder.state === "recording") {
+      stopCascadeRecording();
+    } else {
+      startCascadeRecording();
+    }
   });
 }
 
@@ -235,6 +402,7 @@ function initStudioPresets() {
     };
     initTabs();
     initStudioPresets();
+    initCascade();
     loading?.remove();
     document.getElementById("drone-panel").hidden = false;
   } catch (error) {

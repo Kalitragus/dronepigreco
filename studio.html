@@ -96,6 +96,42 @@
       min-height: 1em;
     }
 
+    #cascade-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.3rem 0.8rem;
+      border: 1px solid rgba(90, 209, 255, 0.25);
+      border-radius: 999px;
+      background: rgba(90, 209, 255, 0.06);
+    }
+
+    #cascade-controls label {
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(236, 243, 255, 0.6);
+      white-space: nowrap;
+    }
+
+    #cascade-controls input[type="range"] {
+      width: 90px;
+      accent-color: var(--accent);
+    }
+
+    #cascade-controls output {
+      font-size: 0.72rem;
+      color: rgba(236, 243, 255, 0.7);
+      min-width: 2.6em;
+      font-variant-numeric: tabular-nums;
+    }
+
+    #cascadeRecBtn.recording {
+      color: #ff5555;
+      border-color: rgba(255, 85, 85, 0.6);
+      background: rgba(255, 85, 85, 0.12);
+    }
+
     .studio-panel {
       display: flex;
       flex-direction: column;
@@ -132,6 +168,12 @@
     <button class="tab-btn active" data-tab="drone-panel" type="button">Drone π</button>
     <button class="tab-btn" data-tab="granulone-panel" type="button">Granulone</button>
     <span class="spacer"></span>
+    <div id="cascade-controls" title="Registra il drone e riversalo come campione nel Granulone">
+      <label for="cascadeAmount">Cascata</label>
+      <input type="range" id="cascadeAmount" min="0" max="100" step="1" value="80">
+      <output id="cascadeVal">80%</output>
+      <button id="cascadeRecBtn" class="studio-action" type="button">&#9679; Riversa</button>
+    </div>
     <span id="studio-status"></span>
     <button id="studioSaveBtn" class="studio-action" type="button" title="Esporta lo stato di entrambi i synth in un file">Export Studio</button>
     <label for="studioImportInput" class="studio-action" title="Importa un file di preset studio">Import Studio</label>
