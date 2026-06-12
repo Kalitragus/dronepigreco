@@ -480,10 +480,70 @@ function initDelaySync() {
   const container = document.querySelector("#granulone-panel #slices");
   if (!container) return;
   const scan = () => {
-    container.querySelectorAll(".slice-card[data-slice-id]").forEach(injectDelaySync);
+    container.querySelectorAll(".slice-card[data-slice-id]").forEach(card => {
+      injectDelaySync(card);
+      injectSliceTrig(card);
+    });
   };
   new MutationObserver(scan).observe(container, { childList: true, subtree: true });
   scan();
+}
+
+// ---------------------------------------------------------------------------
+// Trig dalle voci della drum: opzionale per slice (pulsante TRIG). Quando è
+// attivo, ogni colpo della voce scelta resetta il timer dei grani della
+// slice: il prossimo grano parte esattamente sul colpo (sample-accurate).
+// ---------------------------------------------------------------------------
+const TRIG_VOICES = [["kick", "Kick"], ["snare", "Snare"], ["hat", "Hat"], ["perc", "Perc"]];
+const sliceTrigState = new Map();
+
+function injectSliceTrig(card) {
+  const sliceId = card.dataset.sliceId;
+  if (!sliceId || card.querySelector(".slice-trig")) return;
+  const header = card.querySelector(".slice-header");
+  if (!header) return;
+  let state = sliceTrigState.get(sliceId);
+  if (!state) {
+    state = { enabled: false, voice: "kick" };
+    sliceTrigState.set(sliceId, state);
+  }
+  const wrap = document.createElement("span");
+  wrap.className = "slice-trig";
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "delay-sync-btn" + (state.enabled ? " on" : "");
+  btn.textContent = "TRIG";
+  btn.title = "I colpi della voce scelta resettano i grani di questa slice";
+  const select = document.createElement("select");
+  select.className = "delay-sync-div";
+  TRIG_VOICES.forEach(([value, label]) => {
+    const option = document.createElement("option");
+    option.value = value;
+    option.textContent = label;
+    select.appendChild(option);
+  });
+  select.value = state.voice;
+  select.hidden = !state.enabled;
+  btn.addEventListener("click", () => {
+    state.enabled = !state.enabled;
+    btn.classList.toggle("on", state.enabled);
+    select.hidden = !state.enabled;
+  });
+  select.addEventListener("change", () => {
+    state.voice = select.value;
+  });
+  wrap.append(btn, select);
+  header.appendChild(wrap);
+}
+
+function handleDrumHit(voice, time) {
+  const engine = window.GranuloneAPI?.engine;
+  if (!engine?.isPlaying || !engine._sliceTimers) return;
+  sliceTrigState.forEach((state, sliceId) => {
+    if (state.enabled && state.voice === voice) {
+      engine._sliceTimers.set(sliceId, time);
+    }
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -832,6 +892,7 @@ function initStudioPresets() {
     const drums = createMosquitoDrums(ctx, { masterBus, clock });
     drums.mount(document.getElementById("drums-panel"));
     registerCascadeSend("drums", drums.output, getCascadeAmount());
+    drums.onHit(handleDrumHit);
     window.DrumsAPI = drums;
 
     initTabs();

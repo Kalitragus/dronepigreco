@@ -216,6 +216,7 @@ export function createMosquitoDrums(ctx, { masterBus, clock }) {
   }
 
   const recentHits = { kick: 0, snare: 0, hat: 0, perc: 0 };
+  const hitListeners = new Set();
 
   function onStep(time, step) {
     const energies = regionEnergies();
@@ -232,6 +233,13 @@ export function createMosquitoDrums(ctx, { masterBus, clock }) {
         const velocity = Math.min(1, 0.55 + 0.45 * energy + world.panic * 0.2);
         triggers[name](time, velocity, v);
         recentHits[name] = performance.now();
+        hitListeners.forEach(fn => {
+          try {
+            fn(name, time, velocity);
+          } catch (error) {
+            console.error(error);
+          }
+        });
       }
     });
   }
@@ -452,5 +460,12 @@ export function createMosquitoDrums(ctx, { masterBus, clock }) {
     return true;
   }
 
-  return { output, mount, getState, applyState };
+  // I colpi (voce, tempo audio, velocity) sono osservabili dall'esterno:
+  // lo shell li usa per risincronizzare i grani delle slice di Granulone.
+  function onHit(fn) {
+    hitListeners.add(fn);
+    return () => hitListeners.delete(fn);
+  }
+
+  return { output, mount, getState, applyState, onHit };
 }

@@ -11,24 +11,26 @@ const PARAM_DEFS = [
   ["slide", "Slide", 0, 1, 0.01],
   ["accent", "Accent", 0, 1, 0.01],
   ["cutoff", "Cutoff (Hz)", 200, 4000, 10],
+  ["attack", "Attack (s)", 0.001, 0.3, 0.001],
   ["decay", "Decay (s)", 0.05, 0.6, 0.01],
+  ["envFilter", "Env→Filtro", 0, 1, 0.01],
   ["fx", "Flanger", 0, 1, 0.01]
 ];
 
 // Preset di genere: stessi 8 parametri, caratteri molto diversi.
 const BASS_PRESETS = {
-  "Acid Line": { level: 0.55, density: 0.8, drift: 0.7, gravity: 0.35, slide: 0.65, accent: 0.7, cutoff: 1400, decay: 0.14, fx: 0 },
-  "Dub Foundation": { level: 0.65, density: 0.45, drift: 0.2, gravity: 0.85, slide: 0.2, accent: 0.2, cutoff: 380, decay: 0.42, fx: 0.15 },
-  "Techno Rolling": { level: 0.6, density: 0.9, drift: 0.25, gravity: 0.7, slide: 0.1, accent: 0.45, cutoff: 800, decay: 0.12, fx: 0 },
-  "Deep House Groove": { level: 0.58, density: 0.55, drift: 0.35, gravity: 0.6, slide: 0.3, accent: 0.4, cutoff: 650, decay: 0.22, fx: 0.1 },
-  "Drone Root": { level: 0.6, density: 0.3, drift: 0.05, gravity: 1, slide: 0.5, accent: 0.1, cutoff: 420, decay: 0.55, fx: 0.25 },
-  "Funk Walker": { level: 0.55, density: 0.75, drift: 0.6, gravity: 0.45, slide: 0.25, accent: 0.65, cutoff: 1100, decay: 0.15, fx: 0 },
-  "Ambient Pulse": { level: 0.5, density: 0.35, drift: 0.3, gravity: 0.75, slide: 0.55, accent: 0.15, cutoff: 500, decay: 0.5, fx: 0.35 },
-  "Electro Snap": { level: 0.55, density: 0.65, drift: 0.5, gravity: 0.5, slide: 0.05, accent: 0.8, cutoff: 1800, decay: 0.1, fx: 0 },
-  "Dungeon Crawl": { level: 0.6, density: 0.5, drift: 0.8, gravity: 0.3, slide: 0.4, accent: 0.5, cutoff: 300, decay: 0.3, fx: 0.2 },
-  "Liquid DnB": { level: 0.5, density: 0.85, drift: 0.45, gravity: 0.55, slide: 0.45, accent: 0.55, cutoff: 950, decay: 0.1, fx: 0.3 },
-  "Random Madness": { level: 0.5, density: 0.95, drift: 1, gravity: 0.1, slide: 0.6, accent: 0.6, cutoff: 2400, decay: 0.18, fx: 0.4 },
-  "Flanger-Phaser Glitch": { level: 0.52, density: 0.7, drift: 0.85, gravity: 0.25, slide: 0.15, accent: 0.75, cutoff: 2200, decay: 0.08, fx: 0.9 }
+  "Acid Line": { level: 0.55, density: 0.8, drift: 0.7, gravity: 0.35, slide: 0.65, accent: 0.7, cutoff: 1400, attack: 0.002, decay: 0.14, envFilter: 0.8, fx: 0 },
+  "Dub Foundation": { level: 0.65, density: 0.45, drift: 0.2, gravity: 0.85, slide: 0.2, accent: 0.2, cutoff: 380, attack: 0.02, decay: 0.42, envFilter: 0.3, fx: 0.15 },
+  "Techno Rolling": { level: 0.6, density: 0.9, drift: 0.25, gravity: 0.7, slide: 0.1, accent: 0.45, cutoff: 800, attack: 0.002, decay: 0.12, envFilter: 0.5, fx: 0 },
+  "Deep House Groove": { level: 0.58, density: 0.55, drift: 0.35, gravity: 0.6, slide: 0.3, accent: 0.4, cutoff: 650, attack: 0.005, decay: 0.22, envFilter: 0.45, fx: 0.1 },
+  "Drone Root": { level: 0.6, density: 0.3, drift: 0.05, gravity: 1, slide: 0.5, accent: 0.1, cutoff: 420, attack: 0.08, decay: 0.55, envFilter: 0.25, fx: 0.25 },
+  "Funk Walker": { level: 0.55, density: 0.75, drift: 0.6, gravity: 0.45, slide: 0.25, accent: 0.65, cutoff: 1100, attack: 0.002, decay: 0.15, envFilter: 0.6, fx: 0 },
+  "Ambient Pulse": { level: 0.5, density: 0.35, drift: 0.3, gravity: 0.75, slide: 0.55, accent: 0.15, cutoff: 500, attack: 0.12, decay: 0.5, envFilter: 0.3, fx: 0.35 },
+  "Electro Snap": { level: 0.55, density: 0.65, drift: 0.5, gravity: 0.5, slide: 0.05, accent: 0.8, cutoff: 1800, attack: 0.001, decay: 0.1, envFilter: 0.9, fx: 0 },
+  "Dungeon Crawl": { level: 0.6, density: 0.5, drift: 0.8, gravity: 0.3, slide: 0.4, accent: 0.5, cutoff: 300, attack: 0.01, decay: 0.3, envFilter: 0.5, fx: 0.2 },
+  "Liquid DnB": { level: 0.5, density: 0.85, drift: 0.45, gravity: 0.55, slide: 0.45, accent: 0.55, cutoff: 950, attack: 0.002, decay: 0.1, envFilter: 0.55, fx: 0.3 },
+  "Random Madness": { level: 0.5, density: 0.95, drift: 1, gravity: 0.1, slide: 0.6, accent: 0.6, cutoff: 2400, attack: 0.004, decay: 0.18, envFilter: 0.7, fx: 0.4 },
+  "Flanger-Phaser Glitch": { level: 0.52, density: 0.7, drift: 0.85, gravity: 0.25, slide: 0.15, accent: 0.75, cutoff: 2200, attack: 0.001, decay: 0.08, envFilter: 0.85, fx: 0.9 }
 };
 
 export function createBassline(ctx, { masterBus, clock, getTonalState }) {
@@ -40,7 +42,9 @@ export function createBassline(ctx, { masterBus, clock, getTonalState }) {
     slide: 0.3,
     accent: 0.35,
     cutoff: 900,
+    attack: 0.003,
     decay: 0.18,
+    envFilter: 0.5,
     fx: 0
   };
 
@@ -152,19 +156,23 @@ export function createBassline(ctx, { masterBus, clock, getTonalState }) {
     lastFreq = freq;
 
     const peak = accent ? 1 : 0.7;
+    const attack = Math.max(0.001, params.attack);
     vca.gain.cancelScheduledValues(time);
     if (slide) {
-      vca.gain.setTargetAtTime(peak, time, 0.01);
+      vca.gain.setTargetAtTime(peak, time, attack * 0.5 + 0.005);
     } else {
       vca.gain.setValueAtTime(0.0001, time);
-      vca.gain.linearRampToValueAtTime(peak, time + 0.005);
+      vca.gain.linearRampToValueAtTime(peak, time + attack);
     }
-    vca.gain.setTargetAtTime(0.0001, time + dur, 0.05);
+    const decayStart = time + Math.max(dur, attack + 0.01);
+    vca.gain.setTargetAtTime(0.0001, decayStart, 0.05);
 
-    const envAmt = accent ? 3.2 : 1.8;
+    const maxBoost = accent ? 3.2 : 1.8;
+    const envAmt = 1 + (maxBoost - 1) * params.envFilter;
     filter.frequency.cancelScheduledValues(time);
-    filter.frequency.setValueAtTime(Math.min(9000, params.cutoff * envAmt), time);
-    filter.frequency.setTargetAtTime(params.cutoff, time, dur * 0.6);
+    filter.frequency.setValueAtTime(params.cutoff, time);
+    filter.frequency.linearRampToValueAtTime(Math.min(9000, params.cutoff * envAmt), time + attack);
+    filter.frequency.setTargetAtTime(params.cutoff, time + attack, dur * 0.6);
   }
 
   clock.subscribe(onStep);
