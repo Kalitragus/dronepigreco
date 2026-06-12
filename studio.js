@@ -286,6 +286,129 @@ function initCascade() {
 }
 
 // ---------------------------------------------------------------------------
+// First-run tutorial: short guided tour of the macro functions.
+// ---------------------------------------------------------------------------
+const TOUR_KEY = "dronepigreco.studio.tour.v1";
+const TOUR_STEPS = [
+  {
+    tab: "drone-panel",
+    target: null,
+    title: "Benvenuto nello Studio",
+    text: "Due synth, un solo motore audio: il Drone π genera suono infinito dalle costanti matematiche, il Granulone lo frantuma in grani. Questo mini-tour ti mostra l'essenziale per sentire qualcosa."
+  },
+  {
+    tab: null,
+    target: ".tab-btn[data-tab='granulone-panel']",
+    title: "Cambiare synth",
+    text: "Con questi due pulsanti passi da un synth all'altro. Entrambi restano accesi: puoi lasciare il drone a suonare mentre lavori sul Granulone."
+  },
+  {
+    tab: "drone-panel",
+    target: "#startBtn",
+    title: "Sentire il drone",
+    text: "Premi Start Drone e il suono parte subito. Prova Randomize e i pulsanti delle costanti (π, φ, e…) per cambiare carattere."
+  },
+  {
+    tab: null,
+    target: "#cascade-controls",
+    title: "La Cascata",
+    text: "Con il drone acceso premi ● Riversa per registrarlo; ripremi per fermare. Il take finisce da solo nel Granulone come campione. Lo slider decide quanta cascata di suono riversare."
+  },
+  {
+    tab: "granulone-panel",
+    target: "#playBtn",
+    title: "Sentire il Granulone",
+    text: "Carica un campione (o riversa la Cascata), poi premi Play: i grani partono dalla slice creata automaticamente."
+  },
+  {
+    tab: "granulone-panel",
+    target: "#slices",
+    title: "Pointer e Random pitch",
+    text: "Il cuore espressivo del Granulone: muovi Pointer (%) per scegliere il punto del campione da granulare e alza Random pitch (st) per dare vita e movimento al suono. Spray aggiunge dispersione attorno al pointer."
+  },
+  {
+    tab: null,
+    target: null,
+    title: "Tutto qui",
+    text: "Prime Quantization sul drone intona automaticamente anche il Granulone; Export Studio salva tutto in un file. Rivedi questo tour quando vuoi con il pulsante «?» qui sopra."
+  }
+];
+
+let tourEl = null;
+let tourHighlighted = null;
+
+function clearTourHighlight() {
+  tourHighlighted?.classList.remove("tour-highlight");
+  tourHighlighted = null;
+}
+
+function endTour() {
+  clearTourHighlight();
+  tourEl?.remove();
+  tourEl = null;
+  try {
+    localStorage.setItem(TOUR_KEY, "done");
+  } catch (error) {
+    // storage unavailable: the tour will simply reappear next time
+  }
+}
+
+function showTourStep(index) {
+  const step = TOUR_STEPS[index];
+  if (!step) {
+    endTour();
+    return;
+  }
+  if (step.tab) activateTab(step.tab);
+  clearTourHighlight();
+  if (step.target) {
+    const el = document.querySelector(step.target);
+    if (el) {
+      el.classList.add("tour-highlight");
+      tourHighlighted = el;
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  } else {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+  if (!tourEl) {
+    tourEl = document.createElement("div");
+    tourEl.id = "tour-popup";
+    document.body.appendChild(tourEl);
+  }
+  const isLast = index === TOUR_STEPS.length - 1;
+  tourEl.innerHTML = `
+    <div class="tour-step">${index + 1} / ${TOUR_STEPS.length}</div>
+    <h3>${step.title}</h3>
+    <p>${step.text}</p>
+    <div class="tour-actions">
+      <button type="button" data-tour="skip">Salta</button>
+      <button type="button" data-tour="next" class="primary">${isLast ? "Fine" : "Avanti"}</button>
+    </div>`;
+  tourEl.querySelector("[data-tour='skip']").addEventListener("click", endTour);
+  tourEl.querySelector("[data-tour='next']").addEventListener("click", () => {
+    if (isLast) {
+      endTour();
+    } else {
+      showTourStep(index + 1);
+    }
+  });
+}
+
+function initTour() {
+  document.getElementById("tourBtn")?.addEventListener("click", () => showTourStep(0));
+  let seen = null;
+  try {
+    seen = localStorage.getItem(TOUR_KEY);
+  } catch (error) {
+    seen = "done";
+  }
+  if (!seen) {
+    setTimeout(() => showTourStep(0), 600);
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Common quantization: the drone is the tonal master of the studio.
 // - Prime Quantization ON  -> Granulone quantization forced (Slice Mix 100%,
 //   root note = drone note, controls temporarily disabled).
@@ -470,6 +593,7 @@ function initStudioPresets() {
     initStudioPresets();
     initCascade();
     initQuantizationSync();
+    initTour();
     loading?.remove();
     document.getElementById("drone-panel").hidden = false;
   } catch (error) {

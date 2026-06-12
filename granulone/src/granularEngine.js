@@ -471,7 +471,12 @@ export default class GranularEngine {
     if (this.audioContext.state === "suspended") {
       this.audioContext.resume();
     }
-    this._animationFrame = requestAnimationFrame(this._tick);
+    // Fixed-rate timer instead of requestAnimationFrame: grain scheduling
+    // must not depend on frame rate, main-thread bursts or tab visibility.
+    if (this._animationFrame) {
+      clearInterval(this._animationFrame);
+    }
+    this._animationFrame = setInterval(this._tick, 40);
     this._updateOutputState();
   }
 
@@ -482,7 +487,7 @@ export default class GranularEngine {
     this._stopAllSliceGrains();
     this._stopMainSamplePlayback();
     if (this._animationFrame) {
-      cancelAnimationFrame(this._animationFrame);
+      clearInterval(this._animationFrame);
       this._animationFrame = null;
     }
     this._updateOutputState();
@@ -503,7 +508,9 @@ export default class GranularEngine {
     }
 
     const now = this.audioContext.currentTime;
-    const lookAhead = 0.1;
+    // 0.35s of pre-scheduled grains: absorbs main-thread stalls (UI work,
+    // drone mode crossfades) that starved the old 0.1s window.
+    const lookAhead = 0.35;
 
     this.slices.forEach(slice => {
       const sample = this.samples.get(slice.sampleId);
@@ -535,8 +542,6 @@ export default class GranularEngine {
 
       this._sliceTimers.set(slice.id, nextTime);
     });
-
-    this._animationFrame = requestAnimationFrame(this._tick);
   }
 
   _scheduleGrain(slice, time) {

@@ -132,6 +132,71 @@
       background: rgba(255, 85, 85, 0.12);
     }
 
+    #tour-popup {
+      position: fixed;
+      left: 50%;
+      bottom: 1.2rem;
+      transform: translateX(-50%);
+      z-index: 300;
+      width: min(440px, calc(100vw - 2rem));
+      background: rgba(16, 20, 28, 0.97);
+      border: 1px solid rgba(90, 209, 255, 0.35);
+      border-radius: 14px;
+      padding: 1rem 1.2rem;
+      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.6);
+    }
+
+    #tour-popup .tour-step {
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      color: rgba(236, 243, 255, 0.45);
+    }
+
+    #tour-popup h3 {
+      margin: 0.25rem 0 0.45rem;
+      font-size: 1rem;
+      letter-spacing: 0.05em;
+      color: var(--accent);
+    }
+
+    #tour-popup p {
+      margin: 0 0 0.9rem;
+      font-size: 0.88rem;
+      line-height: 1.55;
+      color: rgba(236, 243, 255, 0.85);
+    }
+
+    .tour-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+    }
+
+    .tour-actions button {
+      border: 1px solid var(--border);
+      background: transparent;
+      color: rgba(236, 243, 255, 0.7);
+      border-radius: 999px;
+      padding: 0.45rem 1.1rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+    }
+
+    .tour-actions button.primary {
+      background: var(--accent-soft);
+      border-color: rgba(90, 209, 255, 0.4);
+      color: var(--accent);
+    }
+
+    .tour-highlight {
+      outline: 2px solid var(--accent);
+      outline-offset: 4px;
+      border-radius: 8px;
+      box-shadow: 0 0 18px rgba(90, 209, 255, 0.35);
+    }
+
     .studio-panel {
       display: flex;
       flex-direction: column;
@@ -175,6 +240,7 @@
       <button id="cascadeRecBtn" class="studio-action" type="button">&#9679; Riversa</button>
     </div>
     <span id="studio-status"></span>
+    <button id="tourBtn" class="studio-action" type="button" title="Rivedi il tutorial">?</button>
     <button id="studioSaveBtn" class="studio-action" type="button" title="Esporta lo stato di entrambi i synth in un file">Export Studio</button>
     <label for="studioImportInput" class="studio-action" title="Importa un file di preset studio">Import Studio</label>
     <input type="file" id="studioImportInput" hidden>
