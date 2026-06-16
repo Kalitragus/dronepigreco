@@ -278,9 +278,13 @@ export function createMosquitoDrums(ctx, { masterBus, clock }) {
 
   let canvas = null;
   let canvasCtx = null;
+  let hostPanel = null;
 
   function drawSwarm() {
-    if (canvasCtx) {
+    // Skip the heavy canvas work when the Drums tab isn't visible: on mobile
+    // these 60fps draws steal main-thread time from audio scheduling and cause
+    // crackle. The swarm physics (setInterval) and hits (clock) keep running.
+    if (canvasCtx && !(hostPanel && hostPanel.hidden)) {
       const g = canvasCtx;
       g.fillStyle = "rgba(10, 20, 8, 0.28)";
       g.fillRect(0, 0, WORLD_W, WORLD_H);
@@ -324,6 +328,7 @@ export function createMosquitoDrums(ctx, { masterBus, clock }) {
   }
 
   function mount(panel) {
+    hostPanel = panel;
     const swarmSection = document.createElement("section");
     swarmSection.className = "synth-section";
     swarmSection.innerHTML = `
