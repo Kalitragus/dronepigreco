@@ -3,7 +3,7 @@
 # Doppio clic su questo file per partire.
 cd "$(dirname "$0")" || { echo "ERRORE: cartella del progetto non trovata."; read -r; exit 1; }
 PORT=8765
-URL="http://localhost:$PORT/studio.html"
+URL="http://localhost:$PORT/"
 
 # Se un vecchio server è rimasto acceso sulla porta, lo chiude prima di ripartire.
 OLD=$(lsof -ti tcp:"$PORT" -sTCP:LISTEN 2>/dev/null)

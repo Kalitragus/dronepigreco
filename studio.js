@@ -148,7 +148,7 @@ function loadClassicScript(src) {
 }
 
 async function mountDrone() {
-  const doc = await fetchDoc("index.html");
+  const doc = await fetchDoc("drone.html");
   doc.querySelectorAll("script").forEach(s => s.remove());
   const panel = document.getElementById("drone-panel");
   const main = doc.querySelector("main");
@@ -922,7 +922,7 @@ function initStudioPresets() {
     console.error(error);
     if (loading) {
       loading.textContent =
-        "Errore di caricamento. Avvia un server locale (python3 -m http.server) e apri http://localhost:8000/studio.html";
+        "Errore di caricamento. Avvia un server locale (python3 -m http.server) e apri http://localhost:8765/";
       loading.style.color = "#ff7777";
     }
   }

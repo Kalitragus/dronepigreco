@@ -32,7 +32,7 @@ ripartire da qui: ogni voce ha [ ] = da fare, [x] = fatto.
 - [x] B2. Integrazione studio: import in `studio.js`, AnalyserNode (fftSize 256)
       su engine.masterGain del granulone (gli analyser NON alterano il suono),
       drone analyser lazy (getOutput disponibile solo dopo ensureAudio),
-      tab "Visual" + panel in `studio.html` + CSS canvas.
+      tab "Visual" + panel in `index.html` (shell dello Studio) + CSS canvas.
 
 ## C. Chiusura
 

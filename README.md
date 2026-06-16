@@ -14,16 +14,16 @@ Created by **Giovanni Barbieri**.
 |---|---|
 | **Mac** | Doppio clic su **`Avvia Studio.command`**. La prima volta macOS può bloccarlo: tasto destro → **Apri** → Apri. Se manca `python3`, macOS propone da solo l'installazione dei Command Line Tools. |
 | **Windows** | Doppio clic su **`Avvia Studio Windows.bat`**. Richiede [Python](https://www.python.org/downloads/) (va bene anche quello del Microsoft Store). |
-| **Qualsiasi sistema** | Da terminale, nella cartella del progetto: `python3 -m http.server 8765`, poi apri `http://localhost:8765/studio.html` |
+| **Qualsiasi sistema** | Da terminale, nella cartella del progetto: `python3 -m http.server 8765`, poi apri `http://localhost:8765/` |
 
 Il server è **solo locale**: gira sul tuo computer e non espone nulla su internet.
 
-> Solo drone, senza server: `index.html` si apre anche con un semplice doppio clic.
+> Solo drone, senza server: `drone.html` si apre anche con un semplice doppio clic.
 
 ## Le pagine
 
-- **`studio.html`** — lo Studio completo: Drone π + Granulone con motore audio unico (richiede il server locale)
-- **`index.html`** — il solo Drone π, standalone
+- **`index.html`** — lo Studio completo: Drone π + Granulone con motore audio unico (richiede il server locale)
+- **`drone.html`** — il solo Drone π, standalone
 - **`granulone/index.html`** — il solo Granulone, standalone
 
 ## Cosa c'è dentro
@@ -46,8 +46,8 @@ JavaScript puro + Web Audio API. Nessuna dipendenza, nessun build step, nessun d
 ## Struttura
 
 ```
-studio.html / studio.js     → shell dello Studio (tab, cascata, sync, tour)
-index.html                  → Drone π standalone
+index.html / studio.js      → shell dello Studio (tab, cascata, sync, tour)
+drone.html                  → Drone π standalone
 drone.js                    → motore del drone (voci, routing, stato)
 pigreco.js                  → le formule delle costanti matematiche
 pi_fx.js / pi_reverb.js     → effetti modulati matematicamente

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="it">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Drone Machine π</title>
+  <title>Studio · Drone π + Granulone</title>
   <style>
     :root {
       color-scheme: dark;
@@ -23,175 +23,289 @@
     body {
       margin: 0;
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 3rem 1.5rem 2.5rem;
-      gap: 2rem;
     }
 
-    main {
-      width: min(1100px, 100%);
-      display: flex;
-      flex-direction: column;
-      gap: 2.5rem;
-    }
-
-    .panel {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      padding: clamp(1.6rem, 2vw, 2.3rem);
-      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.45);
-    }
-
-    h1 {
-      margin: 0 0 0.8rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      font-size: clamp(1.6rem, 3vw, 2.3rem);
-      font-weight: 600;
-    }
-
-    p.lead {
-      margin: 0;
-      color: rgba(236, 243, 255, 0.72);
-      line-height: 1.6;
-      max-width: 720px;
-    }
-
-    .button-row {
+    #studio-bar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
       display: flex;
       flex-wrap: wrap;
-      gap: 0.75rem;
-      margin-top: 1.6rem;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.7rem 1.2rem;
+      background: rgba(12, 15, 22, 0.96);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(8px);
     }
 
-    button {
-      border: 1px solid rgba(90, 209, 255, 0.4);
-      background: var(--accent-soft);
-      color: var(--accent);
+    #studio-bar .brand {
+      font-size: 0.8rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(236, 243, 255, 0.55);
+      margin-right: 0.6rem;
+    }
+
+    .tab-btn {
+      border: 1px solid var(--border);
+      background: transparent;
+      color: rgba(236, 243, 255, 0.65);
       border-radius: 999px;
-      padding: 0.8rem 1.6rem;
-      font-size: 0.95rem;
+      padding: 0.5rem 1.3rem;
+      font-size: 0.85rem;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.06em;
       cursor: pointer;
-      transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease;
+      transition: background 0.2s ease, color 0.2s ease;
     }
 
-    button:hover:not(:disabled) {
-      transform: translateY(-1px);
-      box-shadow: 0 18px 28px rgba(90, 209, 255, 0.25);
+    .tab-btn.active {
+      background: var(--accent-soft);
+      border-color: rgba(90, 209, 255, 0.4);
+      color: var(--accent);
     }
 
-    button:disabled {
-      opacity: 0.55;
-      cursor: default;
+    #studio-bar .spacer {
+      flex: 1;
     }
 
-    h2 {
-      margin: 0 0 1.2rem;
-      font-size: 1.15rem;
-      letter-spacing: 0.08em;
+    .studio-action {
+      border: 1px solid var(--border);
+      background: transparent;
+      color: rgba(236, 243, 255, 0.7);
+      border-radius: 999px;
+      padding: 0.45rem 1rem;
+      font-size: 0.78rem;
+      font-weight: 600;
       text-transform: uppercase;
-      color: rgba(236, 243, 255, 0.78);
-    }
-
-    .global-controls {
-      display: grid;
-      gap: 1.4rem;
-    }
-
-    .slider {
-      display: grid;
-      gap: 0.6rem;
-    }
-
-    .slider label {
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      gap: 0.6rem;
-      font-size: 0.85rem;
       letter-spacing: 0.05em;
-      text-transform: uppercase;
-      color: rgba(236, 243, 255, 0.72);
-    }
-
-    .slider label .note-display {
-      display: flex;
-      align-items: baseline;
-      gap: 0.45rem;
-      font-size: 0.82rem;
-      letter-spacing: 0.03em;
-      color: rgba(236, 243, 255, 0.78);
-      font-variant-numeric: tabular-nums;
-    }
-
-    .slider label .note-display output {
-      color: rgba(236, 243, 255, 0.82);
-    }
-
-    .slider label .note-display .note-pill {
-      padding: 0.1rem 0.55rem;
-      border-radius: 999px;
-      border: 1px solid rgba(236, 243, 255, 0.18);
-      background: rgba(236, 243, 255, 0.08);
-      font-size: 0.75rem;
-    }
-
-    input[type="range"] {
-      appearance: none;
-      width: 100%;
-      height: 6px;
-      background: rgba(236, 243, 255, 0.18);
-      border-radius: 999px;
-      outline: none;
-    }
-
-    input[type="range"]::-webkit-slider-thumb {
-      appearance: none;
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      background: var(--accent);
-      box-shadow: 0 0 0 4px rgba(90, 209, 255, 0.2);
       cursor: pointer;
     }
 
-    .voices-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 1.4rem;
+    .studio-action:hover {
+      color: var(--accent);
+      border-color: rgba(90, 209, 255, 0.4);
     }
 
-    .voice-card {
+    #studio-status {
+      font-size: 0.75rem;
+      color: rgba(236, 243, 255, 0.55);
+      letter-spacing: 0.04em;
+      min-height: 1em;
+    }
+
+    #cascade-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.3rem 0.8rem;
+      border: 1px solid rgba(90, 209, 255, 0.25);
+      border-radius: 999px;
+      background: rgba(90, 209, 255, 0.06);
+    }
+
+    #cascade-controls label {
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(236, 243, 255, 0.6);
+      white-space: nowrap;
+    }
+
+    #cascade-controls input[type="range"] {
+      width: 90px;
+      accent-color: var(--accent);
+    }
+
+    #cascade-controls output {
+      font-size: 0.72rem;
+      color: rgba(236, 243, 255, 0.7);
+      min-width: 2.6em;
+      font-variant-numeric: tabular-nums;
+    }
+
+    #cascadeRecBtn.recording {
+      color: #ff5555;
+      border-color: rgba(255, 85, 85, 0.6);
+      background: rgba(255, 85, 85, 0.12);
+    }
+
+    #tour-popup {
+      position: fixed;
+      left: 50%;
+      bottom: 1.2rem;
+      transform: translateX(-50%);
+      z-index: 300;
+      width: min(440px, calc(100vw - 2rem));
+      background: rgba(16, 20, 28, 0.97);
+      border: 1px solid rgba(90, 209, 255, 0.35);
+      border-radius: 14px;
+      padding: 1rem 1.2rem;
+      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.6);
+    }
+
+    #tour-popup .tour-step {
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      color: rgba(236, 243, 255, 0.45);
+    }
+
+    #tour-popup h3 {
+      margin: 0.25rem 0 0.45rem;
+      font-size: 1rem;
+      letter-spacing: 0.05em;
+      color: var(--accent);
+    }
+
+    #tour-popup p {
+      margin: 0 0 0.9rem;
+      font-size: 0.88rem;
+      line-height: 1.55;
+      color: rgba(236, 243, 255, 0.85);
+    }
+
+    .tour-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+    }
+
+    .tour-actions button {
+      border: 1px solid var(--border);
+      background: transparent;
+      color: rgba(236, 243, 255, 0.7);
+      border-radius: 999px;
+      padding: 0.45rem 1.1rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+    }
+
+    .tour-actions button.primary {
+      background: var(--accent-soft);
+      border-color: rgba(90, 209, 255, 0.4);
+      color: var(--accent);
+    }
+
+    .tour-highlight {
+      outline: 2px solid var(--accent);
+      outline-offset: 4px;
+      border-radius: 8px;
+      box-shadow: 0 0 18px rgba(90, 209, 255, 0.35);
+    }
+
+    #transport {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.3rem 0.8rem;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+    }
+
+    #transport input {
+      width: 3.4em;
+      background: rgba(236, 243, 255, 0.08);
+      border: 1px solid var(--border);
+      color: #ecf3ff;
+      border-radius: 6px;
+      padding: 0.2rem 0.3rem;
+      font-size: 0.8rem;
+      text-align: center;
+    }
+
+    #transport .t-label {
+      font-size: 0.7rem;
+      color: rgba(236, 243, 255, 0.55);
+      letter-spacing: 0.08em;
+    }
+
+    #clockPlayBtn.running {
+      color: #7dd956;
+      border-color: rgba(125, 217, 86, 0.5);
+      background: rgba(125, 217, 86, 0.1);
+    }
+
+    .synth-section {
+      width: min(1100px, 100%);
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 1.8rem;
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.45);
+    }
+
+    .synth-section h2 {
+      margin: 0 0 0.5rem;
+      font-size: 1.05rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(236, 243, 255, 0.8);
+    }
+
+    .synth-hint {
+      margin: 0 0 1.2rem;
+      font-size: 0.82rem;
+      color: rgba(236, 243, 255, 0.55);
+      line-height: 1.55;
+      max-width: 720px;
+    }
+
+    .param-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem 1.4rem;
+    }
+
+    .param {
+      display: grid;
+      gap: 0.45rem;
+    }
+
+    .param label {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.5rem;
+      font-size: 0.72rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: rgba(236, 243, 255, 0.65);
+    }
+
+    .param input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent);
+    }
+
+    .drum-voices {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.2rem;
+    }
+
+    .drum-voice {
       background: rgba(236, 243, 255, 0.04);
       border: 1px solid rgba(236, 243, 255, 0.08);
       border-radius: 14px;
-      padding: 1.1rem;
+      padding: 1rem;
       display: grid;
-      gap: 1rem;
+      gap: 0.8rem;
     }
 
-    .voice-card header {
+    .drum-voice header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 0.5rem;
-      font-size: 0.85rem;
-      letter-spacing: 0.08em;
+      font-size: 0.8rem;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
-      color: rgba(236, 243, 255, 0.68);
+      color: rgba(236, 243, 255, 0.7);
     }
 
-    .voice-card header .voice-freq {
-      margin-left: auto;
-    }
-
-    .mute-btn {
+    .dv-mute {
       border: 1px solid rgba(236, 243, 255, 0.25);
       background: transparent;
       color: rgba(236, 243, 255, 0.55);
@@ -199,608 +313,219 @@
       padding: 0.15rem 0.55rem;
       font-size: 0.72rem;
       font-weight: 700;
-      letter-spacing: 0.05em;
+      cursor: pointer;
     }
 
-    .mute-btn.active {
+    .dv-mute.active {
       background: #ff5555;
       border-color: #ff5555;
       color: #11141a;
       box-shadow: 0 0 8px rgba(255, 85, 85, 0.5);
     }
 
-    .kb-toggle {
-      display: inline-flex;
-      align-items: center;
-      vertical-align: middle;
-      margin-right: 0.55rem;
-      padding: 0.32rem 0.55rem;
-      border-radius: 6px;
-      border: 1px solid rgba(236, 243, 255, 0.25);
-      background: transparent;
-      color: rgba(236, 243, 255, 0.45);
-    }
-
-    .kb-toggle.active {
-      color: var(--accent);
-      border-color: var(--accent);
-      background: var(--accent-soft);
-      box-shadow: 0 0 8px rgba(90, 209, 255, 0.45);
-    }
-
-    .voice-card select {
-      background: rgba(236, 243, 255, 0.12);
-      border: 1px solid rgba(236, 243, 255, 0.22);
-      border-radius: 999px;
-      padding: 0.45rem 0.9rem;
-      color: #ecf3ff;
-      font-size: 0.85rem;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-    }
-
-    #page-footer {
-      width: min(1100px, 100%);
-      padding: 1.5rem clamp(1rem, 2vw, 1.6rem);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      background: rgba(22, 26, 35, 0.7);
-    }
-
-    .prime-toggle {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0.85rem 1rem;
+    #swarmCanvas {
+      display: block;
+      width: 100%;
+      height: 190px;
+      background: #0a1408;
       border-radius: 12px;
-      border: 1px solid rgba(236, 243, 255, 0.12);
-      background: rgba(236, 243, 255, 0.06);
-      text-transform: uppercase;
-      font-size: 0.85rem;
-      letter-spacing: 0.05em;
-      color: rgba(236, 243, 255, 0.78);
-      gap: 1rem;
+      border: 1px solid rgba(125, 217, 86, 0.18);
+      cursor: crosshair;
+      margin-bottom: 1rem;
     }
 
-    .prime-toggle input {
-      accent-color: var(--accent);
-      width: 1.4rem;
-      height: 1.4rem;
-    }
-
-    #math-mode-controls {
-      display: grid;
-      gap: 0.75rem;
-    }
-
-    #math-mode-controls label {
-      font-size: 0.8rem;
-      letter-spacing: 0.18em;
-      color: rgba(236, 243, 255, 0.62);
-      text-transform: uppercase;
-    }
-
-    .mode-buttons {
+    .swarm-controls {
       display: flex;
-      gap: 0.6rem;
+      gap: 1.6rem;
+      align-items: flex-end;
       flex-wrap: wrap;
     }
 
-    .mode-btn {
-      position: relative;
-      margin: 4px;
-      padding: 0.45rem 0.95rem;
-      border: 1px solid #2c3442;
-      background: #1b1f27;
-      color: #d8e2ff;
-      border-radius: 8px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      min-width: 70px;
-      justify-content: center;
-      letter-spacing: 0.12em;
-      font-size: 0.82rem;
-      transition: background 0.25s ease, transform 0.15s ease;
-    }
-
-    .mode-btn:hover {
-      background: #252b35;
-      transform: translateY(-1px);
-    }
-
-    .mode-btn .indicator {
-      width: 10px;
-      height: 10px;
+    .panic-btn {
+      width: 48px;
+      height: 48px;
       border-radius: 50%;
-      background: #222;
-      box-shadow: none;
-      transition: background 0.25s ease, box-shadow 0.25s ease;
+      background: radial-gradient(circle at 35% 30%, #6a3024 0%, #3a1810 100%);
+      border: 1px solid #2a1008;
+      cursor: pointer;
+      color: transparent;
+      overflow: hidden;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 100, 80, 0.2);
+      transition: box-shadow 0.1s ease;
     }
 
-    .mode-btn.active {
-      background: #2a3847;
+    .panic-btn:active {
+      box-shadow: 0 0 16px rgba(196, 76, 58, 0.7), inset 0 1px 4px rgba(0, 0, 0, 0.6);
     }
 
-    .mode-btn.active .indicator {
-      background: #00b3ff;
-      box-shadow: 0 0 6px #00b3ff88;
-    }
-
-    .mode-btn.random {
-      background: #2a3440;
-      font-size: 0.78rem;
-      padding: 0.45rem 1.2rem;
-    }
-
-    .mode-btn.random.active {
-      background: #00b3ff22;
-    }
-
-    .preset-controls {
-      display: grid;
-      gap: 0.9rem;
-    }
-
-    .preset-row {
+    .delay-sync {
       display: flex;
-      flex-wrap: wrap;
-      gap: 0.6rem;
+      gap: 6px;
+      align-items: center;
+      margin-top: 4px;
+    }
+
+    .delay-sync-btn {
+      font-size: 9px;
+      letter-spacing: 0.1em;
+      padding: 2px 9px;
+      border-radius: 999px;
+      border: 1px solid rgba(90, 209, 255, 0.35);
+      background: transparent;
+      color: rgba(236, 243, 255, 0.5);
+      cursor: pointer;
+    }
+
+    .delay-sync-btn.on {
+      color: var(--accent);
+      background: var(--accent-soft);
+      border-color: rgba(90, 209, 255, 0.55);
+      box-shadow: 0 0 6px rgba(90, 209, 255, 0.3);
+    }
+
+    .delay-sync-div {
+      font-size: 10px;
+      background: rgba(236, 243, 255, 0.08);
+      color: #ecf3ff;
+      border: 1px solid rgba(236, 243, 255, 0.2);
+      border-radius: 6px;
+      padding: 2px 4px;
+    }
+
+    #granulone-panel input.slice-delay-time:disabled {
+      opacity: 0.4;
+    }
+
+    .bass-preset-row {
+      max-width: 320px;
+      margin-bottom: 1.2rem;
+    }
+
+    .bass-preset {
+      background: rgba(236, 243, 255, 0.08);
+      color: #ecf3ff;
+      border: 1px solid rgba(236, 243, 255, 0.2);
+      border-radius: 999px;
+      padding: 0.5rem 1rem;
+      font-size: 0.85rem;
+    }
+
+    .slice-trig {
+      display: inline-flex;
+      gap: 6px;
       align-items: center;
     }
 
-    .preset-controls input[type="text"],
-    .preset-controls select {
-      flex: 1;
-      min-width: 160px;
-      background: rgba(236, 243, 255, 0.1);
-      border: 1px solid rgba(236, 243, 255, 0.22);
-      border-radius: 999px;
-      padding: 0.65rem 1.1rem;
-      color: #ecf3ff;
-      font-size: 0.9rem;
-      letter-spacing: 0.03em;
+    #visualCanvas {
+      display: block;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: #05070b;
+      border-radius: 12px;
+      border: 1px solid rgba(90, 209, 255, 0.18);
     }
 
-    label.file-button {
+    #visualCanvas:fullscreen {
+      border-radius: 0;
+      border: none;
+    }
+
+    #visualFullscreenBtn {
       border: 1px solid rgba(90, 209, 255, 0.4);
       background: var(--accent-soft);
       color: var(--accent);
       border-radius: 999px;
-      padding: 0.8rem 1.6rem;
-      font-size: 0.95rem;
+      padding: 0.6rem 1.4rem;
+      font-size: 0.85rem;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.06em;
       cursor: pointer;
-      transition: transform 0.15s ease, box-shadow 0.2s ease;
     }
 
-    label.file-button:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 18px 28px rgba(90, 209, 255, 0.25);
+    .studio-panel {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1.5rem 2.5rem;
+      gap: 2rem;
     }
 
-    .keyboard-hint {
-      margin: 0.4rem 0 0;
-      font-size: 0.72rem;
-      letter-spacing: 0.06em;
+    .studio-panel[hidden] {
+      display: none;
+    }
+
+    #studio-loading {
+      padding: 3rem;
+      text-align: center;
+      color: rgba(236, 243, 255, 0.6);
+      letter-spacing: 0.08em;
       text-transform: uppercase;
-      color: rgba(236, 243, 255, 0.48);
+      font-size: 0.85rem;
     }
 
-    #perf-footer {
-      position: fixed;
-      bottom: 4px;
-      right: 8px;
-      font-family: monospace;
-      font-size: 0.75em;
-      color: #8892a6;
-      background: rgba(20, 24, 30, 0.7);
-      padding: 2px 6px;
-      border-radius: 4px;
-      z-index: 10;
-      user-select: none;
-      pointer-events: none;
-    }
-
-    #perf-stats.alert {
-      color: #ff5555;
-    }
-
-    #perf-footer .credit {
-      color: #6b7488;
-    }
-
-    @media (max-width: 720px) {
-      body {
-        padding: 2.2rem 1rem;
-      }
-
-      .panel {
-        padding: 1.4rem;
-      }
-
-      .button-row {
-        justify-content: center;
-      }
+    /* Granulone base look inside its panel (its body/:root rules can't apply here) */
+    #granulone-panel {
+      align-items: stretch;
+      gap: 24px;
+      max-width: 1100px;
+      margin: 0 auto;
     }
   </style>
-  <script src="pigreco.js" defer></script>
-  <script src="pi_fx.js" defer></script>
-  <script src="pi_reverb.js" defer></script>
-  <script src="drone.js" defer></script>
-  <script src="smart.js" defer></script>
-  <script src="footer.js" defer></script>
 </head>
 <body>
-  <main>
-    <section class="panel">
-      <h1>Drone Machine π</h1>
-      <p class="lead">
-        A four-voice Web Audio synthesizer sculpted by π relationships. Launch the drone, sculpt spectra, and morph between evolving resonances.
-      </p>
-      <div class="button-row">
-        <button id="startBtn">Start Drone</button>
-        <button id="stopBtn" disabled>Stop Drone</button>
-        <button id="randomBtn">Randomize</button>
-      </div>
-    </section>
+  <nav id="studio-bar">
+    <span class="brand">Studio</span>
+    <button class="tab-btn active" data-tab="drone-panel" type="button">Drone π</button>
+    <button class="tab-btn" data-tab="granulone-panel" type="button">Granulone</button>
+    <button class="tab-btn" data-tab="bass-panel" type="button">Basso</button>
+    <button class="tab-btn" data-tab="drums-panel" type="button">Drums</button>
+    <button class="tab-btn" data-tab="visual-panel" type="button">Visual</button>
+    <div id="transport" title="Clock condiviso di basso e batteria">
+      <button id="clockPlayBtn" class="studio-action" type="button">&#9654;</button>
+      <input type="number" id="bpmInput" min="40" max="220" value="110">
+      <span class="t-label">BPM</span>
+    </div>
+    <span class="spacer"></span>
+    <div id="cascade-controls" title="Registra il drone e riversalo come campione nel Granulone">
+      <label for="cascadeAmount">Cascata</label>
+      <input type="range" id="cascadeAmount" min="0" max="100" step="1" value="80">
+      <output id="cascadeVal">80%</output>
+      <button id="cascadeRecBtn" class="studio-action" type="button">&#9679; Riversa</button>
+    </div>
+    <span id="studio-status"></span>
+    <button id="tourBtn" class="studio-action" type="button" title="Rivedi il tutorial">?</button>
+    <button id="studioSaveBtn" class="studio-action" type="button" title="Esporta lo stato di entrambi i synth in un file">Export Studio</button>
+    <label for="studioImportInput" class="studio-action" title="Importa un file di preset studio">Import Studio</label>
+    <input type="file" id="studioImportInput" hidden>
+  </nav>
 
-    <section class="panel">
-      <h2>Global Controls</h2>
-      <div class="global-controls">
-        <div class="slider">
-          <label for="baseFreq">
-            Base Frequency
-            <span class="note-display">
-              <output id="baseFreqVal">220.00 Hz</output>
-              <span id="current-note" class="note-pill">A3</span>
-            </span>
-          </label>
-          <input type="range" id="baseFreq" min="20" max="440" step="0.5" value="220">
-        </div>
-        <div class="slider">
-          <label for="piDepth">
-            π Depth
-            <output id="piDepthVal">0.40</output>
-          </label>
-          <input type="range" id="piDepth" min="0" max="1" step="0.01" value="0.4">
-        </div>
-        <div class="slider">
-          <label for="morph">
-            Morph
-            <output id="morphVal">0.00</output>
-          </label>
-          <input type="range" id="morph" min="0" max="1" step="0.01" value="0">
-        </div>
-        <div class="slider">
-          <label for="resonatorAmount">
-            Resonator Amount
-            <output id="resonatorVal">0.35</output>
-          </label>
-          <input type="range" id="resonatorAmount" min="0" max="1" step="0.01" value="0.35">
-        </div>
-        <div class="slider">
-          <label for="fxAmount">
-            FX Amount
-            <output id="fxAmountVal">0.50</output>
-          </label>
-          <input type="range" id="fxAmount" min="0" max="1" step="0.01" value="0.5">
-        </div>
-        <div class="slider">
-          <label for="masterVolume">
-            Master Volume
-            <output id="masterVolumeVal">0.80</output>
-          </label>
-          <input type="range" id="masterVolume" min="0" max="1" step="0.01" value="0.8">
-        </div>
-        <label class="prime-toggle" for="primeMode">
-          <span>Prime Quantization</span>
-          <input type="checkbox" id="primeMode">
-        </label>
-        <div id="math-mode-controls">
-          <label>Mathematical Modes</label>
-          <div class="mode-buttons">
-            <button id="pi-mode" class="mode-btn active" type="button">
-              <span>π</span>
-              <span class="indicator"></span>
-            </button>
-            <button id="e-mode" class="mode-btn" type="button">
-              <span>e</span>
-              <span class="indicator"></span>
-            </button>
-            <button id="phi-mode" class="mode-btn" type="button">
-              <span>φ</span>
-              <span class="indicator"></span>
-            </button>
-            <button id="zeta-mode" class="mode-btn" type="button">
-              <span>ζ(3)</span>
-              <span class="indicator"></span>
-            </button>
-            <button id="sqrt2-mode" class="mode-btn" type="button">
-              <span>√2</span>
-              <span class="indicator"></span>
-            </button>
-            <button id="phi2-mode" class="mode-btn" type="button">
-              <span>φ²</span>
-              <span class="indicator"></span>
-            </button>
-            <button id="gamma-mode" class="mode-btn" type="button">
-              <span>γ</span>
-              <span class="indicator"></span>
-            </button>
-            <button id="sqrt5-mode" class="mode-btn" type="button">
-              <span>√5</span>
-              <span class="indicator"></span>
-            </button>
-            <button id="catalan-mode" class="mode-btn" type="button">
-              <span>G</span>
-              <span class="indicator"></span>
-            </button>
-            <button id="sqrt3-mode" class="mode-btn" type="button">
-              <span>√3</span>
-              <span class="indicator"></span>
-            </button>
-            <button id="tau-mode" class="mode-btn" type="button">
-              <span>τ</span>
-              <span class="indicator"></span>
-            </button>
-            <button id="zeta2-mode" class="mode-btn" type="button">
-              <span>ζ(2)</span>
-              <span class="indicator"></span>
-            </button>
-            <button id="random-mode" class="mode-btn random" type="button">RANDOM</button>
-          </div>
-          <p class="keyboard-hint">
-            <button id="kbToggle" class="kb-toggle" type="button" aria-pressed="false" title="Computer keyboard on/off">
-              <svg width="20" height="13" viewBox="0 0 20 13" aria-hidden="true">
-                <rect x="0.5" y="0.5" width="19" height="12" rx="2" fill="none" stroke="currentColor"/>
-                <line x1="7" y1="0.5" x2="7" y2="12.5" stroke="currentColor"/>
-                <line x1="13" y1="0.5" x2="13" y2="12.5" stroke="currentColor"/>
-                <rect x="5.4" y="0.5" width="3.2" height="7" fill="currentColor"/>
-                <rect x="11.4" y="0.5" width="3.2" height="7" fill="currentColor"/>
-              </svg>
-            </button>
-            <span>Keyboard: A W S E D F T G Y H U J K &nbsp;|&nbsp; Z/X change octave</span>
-          </p>
-        </div>
-      </div>
-    </section>
+  <div id="studio-loading">Caricamento synth…</div>
+  <div id="drone-panel" class="studio-panel" hidden></div>
+  <div id="granulone-panel" class="studio-panel" hidden></div>
+  <div id="bass-panel" class="studio-panel" hidden></div>
+  <div id="drums-panel" class="studio-panel" hidden></div>
+  <div id="visual-panel" class="studio-panel" hidden></div>
 
-    <section class="panel">
-      <h2>Evolve</h2>
-      <div class="global-controls">
-        <label class="prime-toggle" for="driftToggle">
-          <span>Slow Drift (Generative)</span>
-          <input type="checkbox" id="driftToggle">
-        </label>
-        <div class="slider">
-          <label for="driftRate">
-            Drift Rate
-            <output id="driftRateVal">0.30</output>
-          </label>
-          <input type="range" id="driftRate" min="0" max="1" step="0.01" value="0.3">
-        </div>
-        <div class="slider">
-          <label for="driftDepth">
-            Drift Intensity
-            <output id="driftDepthVal">0.35</output>
-          </label>
-          <input type="range" id="driftDepth" min="0" max="1" step="0.01" value="0.35">
-        </div>
-      </div>
-    </section>
-
-    <section class="panel" id="preset-panel">
-      <h2>Presets</h2>
-      <div class="preset-controls">
-        <div class="preset-row">
-          <input type="text" id="presetName" placeholder="Preset name" maxlength="40" autocomplete="off">
-          <button id="presetSaveBtn" type="button">Save</button>
-        </div>
-        <div class="preset-row">
-          <select id="presetList"></select>
-          <button id="presetLoadBtn" type="button" disabled>Load</button>
-          <button id="presetDeleteBtn" type="button" disabled>Delete</button>
-        </div>
-        <div class="preset-row">
-          <button id="presetExportBtn" type="button">Export File</button>
-          <label class="file-button" for="presetImportInput">Import File</label>
-          <input type="file" id="presetImportInput" hidden>
-        </div>
-        <p id="presetStatus" class="keyboard-hint"></p>
-      </div>
-    </section>
-
-    <section class="panel">
-      <h2>Voices</h2>
-      <div class="voices-grid">
-        <article class="voice-card" data-voice="0">
-          <header>
-            <span>Voice 1</span>
-            <button id="voice-0-mute" class="mute-btn" type="button" aria-pressed="false" title="Mute voice 1">M</button>
-            <span id="voice-0-freq" class="voice-freq">220.0 Hz</span>
-          </header>
-          <label>
-            Waveform
-            <select id="voice-0-waveform" data-voice="0" data-param="waveform">
-              <option value="sine">Sine</option>
-              <option value="triangle">Triangle</option>
-              <option value="sawtooth">Sawtooth</option>
-              <option value="square">Square</option>
-            </select>
-          </label>
-          <div class="slider">
-            <label for="voice-0-pan">
-              Pan
-              <output id="voice-0-pan-val">-0.60</output>
-            </label>
-            <input type="range" id="voice-0-pan" min="-1" max="1" step="0.01" value="-0.6" data-voice="0" data-param="pan">
-          </div>
-          <div class="slider">
-            <label for="voice-0-gain">
-              Gain
-              <output id="voice-0-gain-val">0.22</output>
-            </label>
-            <input type="range" id="voice-0-gain" min="0" max="0.5" step="0.01" value="0.22" data-voice="0" data-param="gain">
-          </div>
-          <div class="slider">
-            <label>
-              LP Cutoff
-              <output id="voice-0-cutoff-val">4000 Hz</output>
-            </label>
-            <input type="range" id="voice-0-cutoff" min="200" max="10000" step="10" value="4000" data-voice="0" data-param="cutoff">
-          </div>
-          <div class="slider">
-            <label>
-              Resonance
-              <output id="voice-0-res-val">0.7</output>
-            </label>
-            <input type="range" id="voice-0-res" min="0.1" max="10" step="0.1" value="0.7" data-voice="0" data-param="resonance">
-          </div>
-        </article>
-
-        <article class="voice-card" data-voice="1">
-          <header>
-            <span>Voice 2</span>
-            <button id="voice-1-mute" class="mute-btn" type="button" aria-pressed="false" title="Mute voice 2">M</button>
-            <span id="voice-1-freq" class="voice-freq">345.6 Hz</span>
-          </header>
-          <label>
-            Waveform
-            <select id="voice-1-waveform" data-voice="1" data-param="waveform">
-              <option value="triangle">Triangle</option>
-              <option value="sine">Sine</option>
-              <option value="sawtooth">Sawtooth</option>
-              <option value="square">Square</option>
-            </select>
-          </label>
-          <div class="slider">
-            <label for="voice-1-pan">
-              Pan
-              <output id="voice-1-pan-val">-0.20</output>
-            </label>
-            <input type="range" id="voice-1-pan" min="-1" max="1" step="0.01" value="-0.2" data-voice="1" data-param="pan">
-          </div>
-          <div class="slider">
-            <label for="voice-1-gain">
-              Gain
-              <output id="voice-1-gain-val">0.18</output>
-            </label>
-            <input type="range" id="voice-1-gain" min="0" max="0.5" step="0.01" value="0.18" data-voice="1" data-param="gain">
-          </div>
-          <div class="slider">
-            <label>
-              LP Cutoff
-              <output id="voice-1-cutoff-val">4000 Hz</output>
-            </label>
-            <input type="range" id="voice-1-cutoff" min="200" max="10000" step="10" value="4000" data-voice="1" data-param="cutoff">
-          </div>
-          <div class="slider">
-            <label>
-              Resonance
-              <output id="voice-1-res-val">0.7</output>
-            </label>
-            <input type="range" id="voice-1-res" min="0.1" max="10" step="0.1" value="0.7" data-voice="1" data-param="resonance">
-          </div>
-        </article>
-
-        <article class="voice-card" data-voice="2">
-          <header>
-            <span>Voice 3</span>
-            <button id="voice-2-mute" class="mute-btn" type="button" aria-pressed="false" title="Mute voice 3">M</button>
-            <span id="voice-2-freq" class="voice-freq">230.4 Hz</span>
-          </header>
-          <label>
-            Waveform
-            <select id="voice-2-waveform" data-voice="2" data-param="waveform">
-              <option value="sawtooth">Sawtooth</option>
-              <option value="sine">Sine</option>
-              <option value="triangle">Triangle</option>
-              <option value="square">Square</option>
-            </select>
-          </label>
-          <div class="slider">
-            <label for="voice-2-pan">
-              Pan
-              <output id="voice-2-pan-val">0.25</output>
-            </label>
-            <input type="range" id="voice-2-pan" min="-1" max="1" step="0.01" value="0.25" data-voice="2" data-param="pan">
-          </div>
-          <div class="slider">
-            <label for="voice-2-gain">
-              Gain
-              <output id="voice-2-gain-val">0.16</output>
-            </label>
-            <input type="range" id="voice-2-gain" min="0" max="0.5" step="0.01" value="0.16" data-voice="2" data-param="gain">
-          </div>
-          <div class="slider">
-            <label>
-              LP Cutoff
-              <output id="voice-2-cutoff-val">4000 Hz</output>
-            </label>
-            <input type="range" id="voice-2-cutoff" min="200" max="10000" step="10" value="4000" data-voice="2" data-param="cutoff">
-          </div>
-          <div class="slider">
-            <label>
-              Resonance
-              <output id="voice-2-res-val">0.7</output>
-            </label>
-            <input type="range" id="voice-2-res" min="0.1" max="10" step="0.1" value="0.7" data-voice="2" data-param="resonance">
-          </div>
-        </article>
-
-        <article class="voice-card" data-voice="3">
-          <header>
-            <span>Voice 4</span>
-            <button id="voice-3-mute" class="mute-btn" type="button" aria-pressed="false" title="Mute voice 4">M</button>
-            <span id="voice-3-freq" class="voice-freq">165.0 Hz</span>
-          </header>
-          <label>
-            Waveform
-            <select id="voice-3-waveform" data-voice="3" data-param="waveform">
-              <option value="sine">Sine</option>
-              <option value="triangle">Triangle</option>
-              <option value="sawtooth">Sawtooth</option>
-              <option value="square">Square</option>
-            </select>
-          </label>
-          <div class="slider">
-            <label for="voice-3-pan">
-              Pan
-              <output id="voice-3-pan-val">0.60</output>
-            </label>
-            <input type="range" id="voice-3-pan" min="-1" max="1" step="0.01" value="0.6" data-voice="3" data-param="pan">
-          </div>
-          <div class="slider">
-            <label for="voice-3-gain">
-              Gain
-              <output id="voice-3-gain-val">0.14</output>
-            </label>
-            <input type="range" id="voice-3-gain" min="0" max="0.5" step="0.01" value="0.14" data-voice="3" data-param="gain">
-          </div>
-          <div class="slider">
-            <label>
-              LP Cutoff
-              <output id="voice-3-cutoff-val">4000 Hz</output>
-            </label>
-            <input type="range" id="voice-3-cutoff" min="200" max="10000" step="10" value="4000" data-voice="3" data-param="cutoff">
-          </div>
-          <div class="slider">
-            <label>
-              Resonance
-              <output id="voice-3-res-val">0.7</output>
-            </label>
-            <input type="range" id="voice-3-res" min="0.1" max="10" step="0.1" value="0.7" data-voice="3" data-param="resonance">
-          </div>
-        </article>
-      </div>
-    </section>
-  </main>
-
-  <footer id="page-footer"></footer>
-  <footer id="perf-footer"><span class="credit">Created by Giovanni Barbieri&nbsp;&middot;&nbsp;</span><span id="perf-stats">CPU: -- % | FPS: --</span></footer>
+  <script>
+    // Opened by double-clicking the file: modules and fetch are blocked on
+    // file://, so explain how to start instead of hanging on "Caricamento".
+    if (location.protocol === "file:") {
+      document.addEventListener("DOMContentLoaded", () => {
+        const el = document.getElementById("studio-loading");
+        if (el) {
+          el.innerHTML =
+            "Lo Studio non può partire aprendo il file direttamente.<br><br>" +
+            "Chiudi questa pagina e fai doppio clic su <strong>“Avvia Studio.command”</strong> " +
+            "nella cartella del progetto: avvia tutto da solo e apre il browser.";
+          el.style.color = "#ffb86b";
+          el.style.textTransform = "none";
+          el.style.letterSpacing = "0.02em";
+          el.style.lineHeight = "1.7";
+        }
+      });
+    }
+  </script>
+  <script type="module" src="studio.js"></script>
 </body>
 </html>
